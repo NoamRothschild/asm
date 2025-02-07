@@ -1,3 +1,7 @@
 # Binaries
 *.o
 **/bin/**
+
+# Ignore commonly required files
+**/general.asm
+!common/general.asm
