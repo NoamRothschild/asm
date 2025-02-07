@@ -118,6 +118,7 @@ function_f:
     push ecx
     push edx
     push esi
+    push edi
     ; offsets:
     ; 8: D, 12: C, 16: B, 20: t
 
@@ -183,6 +184,7 @@ function_f:
     call printTerminator
     call exit
 .end:
+    pop edi
     pop esi
     pop edx
     pop ecx

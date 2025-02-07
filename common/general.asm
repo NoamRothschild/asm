@@ -27,9 +27,9 @@ printInt: ;(int)
 	jmp .iPrintLoop
 .iPrintEnd:
 
-	iPrintPrint:
+	.iPrintPrint:
 	call printChar
-	loop iPrintPrint
+	loop .iPrintPrint
 	pop ebx
 	pop ecx
 	pop edx
@@ -120,6 +120,7 @@ chrtoi:
     push    ecx             ; preserve ecx on the stack to be restored after function runs
     push    edx             ; preserve edx on the stack to be restored after function runs
     push    esi             ; preserve esi on the stack to be restored after function runs
+    push    eax             ; preserve eax on the stack to be restored after function runs
     mov     esi, eax        ; move pointer in eax into esi (our number to convert)
     mov     eax, 0          ; initialise eax with decimal value 0
     mov     ecx, 0          ; initialise ecx with decimal value 0
@@ -146,6 +147,7 @@ chrtoi:
     div     ebx             ; divide eax by value in ebx (in this case 10)
  
 .restore:
+	pop     esi             ; restore eax from the value we pushed onto the stack at the start
     pop     esi             ; restore esi from the value we pushed onto the stack at the start
     pop     edx             ; restore edx from the value we pushed onto the stack at the start
     pop     ecx             ; restore ecx from the value we pushed onto the stack at the start
