@@ -3,7 +3,7 @@ os.chdir(os.path.abspath(os.path.dirname(__file__)))
 try:
     from termcolor import colored
 except ImportError:
-    colored = None
+    colored = lambda msg, _: msg
 
 def foo(dir):
     warn_count = 0
@@ -36,10 +36,7 @@ def test_file(fpath):
                     diff -= {reg for reg in diff if len(reg) == 2 and f'e{reg[0]}x' in blackboxed_registers}
                     if diff:
                         warn_message = f"Warning in file {fpath}, function {function_name.strip().split(':')[0]}\nFollowing registers are not blackboxed: {diff}\n"
-                        if colored:
-                            print(colored(warn_message, "yellow"))
-                        else:
-                            print(warn_message)
+                        print(colored(warn_message, "yellow"))
                         warn_count += 1
 
                 blackboxing_phase = True
@@ -61,10 +58,17 @@ def test_file(fpath):
                     continue
                 for register in fetch_registers(stripped):
                     found_registers.add(register)
+
+        if (diff := blackboxed_registers ^ found_registers):
+            diff -= {reg for reg in diff if len(reg) == 2 and f'e{reg[0]}x' in blackboxed_registers}
+            if diff:
+                warn_message = f"Warning in file {fpath}, function {function_name.strip().split(':')[0]}\nFollowing registers are not blackboxed: {diff}\n"
+                print(colored(warn_message, "yellow"))
+                warn_count += 1
     return warn_count
 
 if __name__ == "__main__":
     if (warn_count := foo('.')) == 0:
-        print("No warnings issued.")
+        print(colored("No warnings issued.", "red"))
     else:
-        print(f"{warn_count} warnings found.")
+        print(colored(f"{warn_count} warnings found.", "red"))

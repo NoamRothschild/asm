@@ -199,6 +199,7 @@ constants_k:
     push ebp
     mov ebp, esp
     push eax
+    push edi
 
     mov eax, [ebp+8] ; k
     cmp eax, 0
@@ -238,6 +239,7 @@ constants_k:
     call printTerminator
     call exit
 .end:
+    pop edi
     pop eax
     pop ebp
     ret
