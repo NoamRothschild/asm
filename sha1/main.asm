@@ -1,5 +1,5 @@
-%include 'general.asm'
-%include 'debug.asm'
+%include '../common/general.asm'
+%include '../common/debug.asm'
 %include 'sha1_utils.asm'
 section .data
     msg db 01100001b, 01100010b, 01100011b, 01100100b, 01100101b

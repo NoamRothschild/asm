@@ -1,4 +1,4 @@
-%include 'general.asm'
+%include '../common/general.asm'
 %include 'lib.asm'
 
 section .data
