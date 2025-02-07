@@ -69,6 +69,6 @@ def test_file(fpath):
 
 if __name__ == "__main__":
     if (warn_count := foo('.')) == 0:
-        print(colored("No warnings issued.", "red"))
+        print(colored("No warnings issued.", "green"))
     else:
         print(colored(f"{warn_count} warnings found.", "red"))
