@@ -258,29 +258,6 @@ digest:
     push ebp
     mov ebp, esp
 
-    ;//mov eax, [ebp+8] ; adress of output buffer, also used to store H0..H4
-    ;//mov ebx, SHA1_H0
-    ;//;bswap ebx ; todo: check if required
-    ;//mov [eax], ebx
-    ;//add eax, 4
-    ;//mov ebx, SHA1_H1
-    ;//;bswap ebx ; todo: check if required
-    ;//mov [eax], ebx
-    ;//add eax, 4
-    ;//mov ebx, SHA1_H2
-    ;//;bswap ebx ; todo: check if required
-    ;//mov [eax], ebx
-    ;//add eax, 4
-    ;//mov ebx, SHA1_H3
-    ;//;bswap ebx ; todo: check if required
-    ;//mov [eax], ebx
-    ;//add eax, 4
-    ;//mov ebx, SHA1_H4
-    ;//;bswap ebx ; todo: check if required
-    ;//mov [eax], ebx
-
-    ;memcpy(dest*, src*, byte_length) 
-    
     push dword w_buff
     push dword 0x0
     push dword SHA1_W_BUFF_BYTES
@@ -299,20 +276,35 @@ digest:
     sub ebx, 3
     shl ebx, 2
     add ebx, w_buff
-    mov esi, [ebx] ; W(t-3)
+    mov ebx, [ebx]
+    bswap ebx
+    mov esi, ebx ; W(t-3)
 
     mov ebx, ecx
     sub ebx, 8
     shl ebx, 2
     add ebx, w_buff
-    xor esi, dword [ebx] ; W(t-8)
+    mov ebx, [ebx]
+    bswap ebx
+    xor esi, ebx ; W(t-8)
+
+    mov ebx, ecx
+    sub ebx, 14
+    shl ebx, 2
+    add ebx, w_buff
+    mov ebx, [ebx]
+    bswap ebx
+    xor esi, ebx ; W(t-14)
 
     mov ebx, ecx
     sub ebx, 16
     shl ebx, 2
     add ebx, w_buff
-    xor esi, dword [ebx] ; W(t-16)
+    mov ebx, [ebx]
+    bswap ebx
+    xor esi, ebx ; W(t-16)
     rol esi, 1 ; S^1
+    bswap esi
 
     mov ebx, ecx
     shl ebx, 2
@@ -322,7 +314,6 @@ digest:
     inc ecx
     cmp ecx, 80
     jl .extend_buff
-
     sub esp, 4*6 ; reserving space for 6 dwords
     mov edi, esp
     ; edi+0  - A
@@ -357,7 +348,9 @@ digest:
     mov ebx, ecx
     shl ebx, 2
     add ebx, w_buff
-    add esi, [ebx] ; W(t)
+    mov ebx, [ebx]
+    bswap ebx
+    add esi, ebx ; W(t)
 
     push ecx
     call constants_k
@@ -379,7 +372,7 @@ digest:
     mov ebx, [edi+0]
     mov [edi+4], ebx ; B = A;
 
-    mov ebx, [ebp+20]
+    mov ebx, [edi+20]
     mov [edi+0], ebx ; A = TEMP;
 
     inc ecx

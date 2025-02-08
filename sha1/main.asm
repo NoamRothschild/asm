@@ -46,9 +46,13 @@ _start:
     push output
     call digest
 
-    push dword 20
+    ;push dword SHA1_W_BUFF_BYTES
+    ;push w_buff
+    ;call printHex
+    push dword 160/8
     push output
     call printHex
+    .tdst:
     ;call printTerminator
     ;push dword SHA1_CHUNK_SIZE_BYTES
     ;push chunk
