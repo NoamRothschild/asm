@@ -4,6 +4,9 @@ section .data
     SHA1_CHUNK_DATA_LEN   equ SHA1_CHUNK_SIZE_BITS - 64
     SHA1_W_BUFF_BYTES     equ 80 * 4
 
+    SHA1_OUTPUT_SIZE_BITS equ 160
+    SHA1_OUTPUT_SIZE_BYTES equ SHA1_OUTPUT_SIZE_BITS / 8
+
     SHA1_K_CONST1 equ 0x5A827999
     SHA1_K_CONST2 equ 0x6ED9EBA1
     SHA1_K_CONST3 equ 0x8F1BBCDC
@@ -257,6 +260,9 @@ constants_k:
 digest:
     push ebp
     mov ebp, esp
+    push esi
+    push ecx
+    push ebx
 
     push dword w_buff
     push dword 0x0
@@ -408,5 +414,8 @@ digest:
 
     add esp, 4*6 ; deallocating variables
 
+    pop ebx
+    pop ecx
+    pop esi
     pop ebp
     ret
