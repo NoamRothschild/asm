@@ -2,14 +2,22 @@ section .data
     SHA1_CHUNK_SIZE_BYTES equ 64
     SHA1_CHUNK_SIZE_BITS  equ SHA1_CHUNK_SIZE_BYTES * 8
     SHA1_CHUNK_DATA_LEN   equ SHA1_CHUNK_SIZE_BITS - 64
+    SHA1_W_BUFF_BYTES     equ 80 * 4
 
     SHA1_K_CONST1 equ 0x5A827999
     SHA1_K_CONST2 equ 0x6ED9EBA1
     SHA1_K_CONST3 equ 0x8F1BBCDC
     SHA1_K_CONST4 equ 0xCA62C1D6
 
+    SHA1_H0 equ 0x67452301
+    SHA1_H1 equ 0xEFCDAB89
+    SHA1_H2 equ 0x98BADCFE
+    SHA1_H3 equ 0x10325476
+    SHA1_H4 equ 0xC3D2E1F0
+
 section .bss
     chunk: resb SHA1_CHUNK_SIZE_BYTES ; reserve 512 bits
+    w_buff: resb SHA1_W_BUFF_BYTES
 
 section .text
 
@@ -241,5 +249,171 @@ constants_k:
 .end:
     pop edi
     pop eax
+    pop ebp
+    ret
+
+; digest(&buff)
+; psh 160bit buffer, call digest
+digest:
+    push ebp
+    mov ebp, esp
+
+    ;//mov eax, [ebp+8] ; adress of output buffer, also used to store H0..H4
+    ;//mov ebx, SHA1_H0
+    ;//;bswap ebx ; todo: check if required
+    ;//mov [eax], ebx
+    ;//add eax, 4
+    ;//mov ebx, SHA1_H1
+    ;//;bswap ebx ; todo: check if required
+    ;//mov [eax], ebx
+    ;//add eax, 4
+    ;//mov ebx, SHA1_H2
+    ;//;bswap ebx ; todo: check if required
+    ;//mov [eax], ebx
+    ;//add eax, 4
+    ;//mov ebx, SHA1_H3
+    ;//;bswap ebx ; todo: check if required
+    ;//mov [eax], ebx
+    ;//add eax, 4
+    ;//mov ebx, SHA1_H4
+    ;//;bswap ebx ; todo: check if required
+    ;//mov [eax], ebx
+
+    ;memcpy(dest*, src*, byte_length) 
+    
+    push dword w_buff
+    push dword 0x0
+    push dword SHA1_W_BUFF_BYTES
+    call memset
+
+    push dword w_buff
+    push dword chunk
+    push SHA1_CHUNK_SIZE_BYTES
+    call memcpy
+    add esp, 4
+
+    mov ecx, 16 
+.extend_buff: ; Extending 16bit buff to 80 bits. see SHA-1 RFC section 6.1-b
+
+    mov ebx, ecx
+    sub ebx, 3
+    shl ebx, 2
+    add ebx, w_buff
+    mov esi, [ebx] ; W(t-3)
+
+    mov ebx, ecx
+    sub ebx, 8
+    shl ebx, 2
+    add ebx, w_buff
+    xor esi, dword [ebx] ; W(t-8)
+
+    mov ebx, ecx
+    sub ebx, 16
+    shl ebx, 2
+    add ebx, w_buff
+    xor esi, dword [ebx] ; W(t-16)
+    rol esi, 1 ; S^1
+
+    mov ebx, ecx
+    shl ebx, 2
+    add ebx, w_buff
+    mov [ebx], esi
+
+    inc ecx
+    cmp ecx, 80
+    jl .extend_buff
+
+    sub esp, 4*6 ; reserving space for 6 dwords
+    mov edi, esp
+    ; edi+0  - A
+    ; edi+4  - B
+    ; edi+8  - C
+    ; edi+12 - D
+    ; edi+16 - E
+    ; edi+20 - TEMP
+
+    mov dword [edi+0 ], SHA1_H0
+    mov dword [edi+4 ], SHA1_H1
+    mov dword [edi+8 ], SHA1_H2
+    mov dword [edi+12], SHA1_H3
+    mov dword [edi+16], SHA1_H4
+
+    xor ecx, ecx
+.section_d:
+
+    mov esi, [edi+0]
+    rol esi, 5 ; S^5(A)
+
+    push ecx             ; t
+    push dword [edi+4 ]  ; B
+    push dword [edi+8 ]  ; C
+    push dword [edi+12]  ; D
+    call function_f
+    pop ebx
+
+    add esi, ebx
+    add esi, dword [edi+16] ; E
+
+    mov ebx, ecx
+    shl ebx, 2
+    add ebx, w_buff
+    add esi, [ebx] ; W(t)
+
+    push ecx
+    call constants_k
+    pop ebx
+    add esi, ebx ; K(t)
+
+    mov [edi+20], esi ; store in TEMP
+
+    mov ebx, [edi+12]
+    mov [edi+16], ebx ; E = D;
+
+    mov ebx, [edi+8]
+    mov [edi+12], ebx ; D = C;
+
+    mov ebx, [edi+4]
+    rol ebx, 30
+    mov [edi+8], ebx ; C = S^30(B);
+
+    mov ebx, [edi+0]
+    mov [edi+4], ebx ; B = A;
+
+    mov ebx, [ebp+20]
+    mov [edi+0], ebx ; A = TEMP;
+
+    inc ecx
+    cmp ecx, 80
+    jl .section_d
+
+    mov eax, [ebp+8] ; output buffer
+
+    mov ebx, SHA1_H0
+    add ebx, [edi+0]
+    bswap ebx
+    mov [eax], ebx
+
+    mov ebx, SHA1_H1
+    add ebx, [edi+4]
+    bswap ebx
+    mov [eax+4], ebx
+
+    mov ebx, SHA1_H2
+    add ebx, [edi+8]
+    bswap ebx
+    mov [eax+8], ebx
+
+    mov ebx, SHA1_H3
+    add ebx, [edi+12]
+    bswap ebx
+    mov [eax+12], ebx
+
+    mov ebx, SHA1_H4
+    add ebx, [edi+16]
+    bswap ebx
+    mov [eax+16], ebx
+
+    add esp, 4*6 ; deallocating variables
+
     pop ebp
     ret

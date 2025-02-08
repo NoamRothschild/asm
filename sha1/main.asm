@@ -6,6 +6,9 @@ section .data
     length_bytes dd 5
     lengh_bits   dd 5 * 8
 
+section .bss
+    output: resb 160/8 ; 20 bytes
+
 section .text
 
 global _start
@@ -40,9 +43,11 @@ _start:
     push dword msg
     push dword [length_bytes]
     call makeChunk
+    push output
+    call digest
 
-    push dword SHA1_CHUNK_SIZE_BYTES
-    push chunk
+    push dword 20
+    push output
     call printHex
     ;call printTerminator
     ;push dword SHA1_CHUNK_SIZE_BYTES
