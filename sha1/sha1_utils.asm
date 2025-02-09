@@ -415,51 +415,35 @@ digest:
 
     mov ebx, [sha1_h0]
     add ebx, [edi+0]
+    mov [sha1_h0], ebx
     bswap ebx
     mov [eax], ebx
-    mov [sha1_h0], ebx
 
     mov ebx, [sha1_h1]
     add ebx, [edi+4]
+    mov [sha1_h1], ebx
     bswap ebx
     mov [eax+4], ebx
-    mov [sha1_h1], ebx
 
     mov ebx, [sha1_h2]
     add ebx, [edi+8]
+    mov [sha1_h2], ebx
     bswap ebx
     mov [eax+8], ebx
-    mov [sha1_h2], ebx
 
     mov ebx, [sha1_h3]
     add ebx, [edi+12]
+    mov [sha1_h3], ebx
     bswap ebx
     mov [eax+12], ebx
-    mov [sha1_h3], ebx
 
     mov ebx, [sha1_h4]
     add ebx, [edi+16]
+    mov [sha1_h4], ebx
     bswap ebx
     mov [eax+16], ebx
-    mov [sha1_h4], ebx
 
     add esp, 4*6 ; deallocating variables
-
-    mov eax, [sha1_h0]
-    bswap eax
-    mov [sha1_h0], eax
-    mov eax, [sha1_h1]
-    bswap eax
-    mov [sha1_h1], eax
-    mov eax, [sha1_h2]
-    bswap eax
-    mov [sha1_h2], eax
-    mov eax, [sha1_h3]
-    bswap eax
-    mov [sha1_h3], eax
-    mov eax, [sha1_h4]
-    bswap eax
-    mov [sha1_h4], eax
 
     pop eax
     pop ebx
