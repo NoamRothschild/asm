@@ -283,6 +283,7 @@ digest:
     push esi
     push ecx
     push ebx
+    push eax
 
     push dword w_buff
     push dword 0x0
@@ -444,59 +445,6 @@ digest:
 
     add esp, 4*6 ; deallocating variables
 
-    pop ebx
-    pop ecx
-    pop esi
-    pop ebp
-    ret 4
-
-sha1_reset_h:
-    mov dword [sha1_h0], SHA1_H0_DEFAULT
-    mov dword [sha1_h1], SHA1_H1_DEFAULT
-    mov dword [sha1_h2], SHA1_H2_DEFAULT
-    mov dword [sha1_h3], SHA1_H3_DEFAULT
-    mov dword [sha1_h4], SHA1_H4_DEFAULT
-    ret
-
-sha1:
-    push ebp
-    mov ebp, esp
-    
-    call sha1_reset_h
-
-    cmp dword [ebp+8], 56
-    jb .short
-    cmp dword [ebp+8], SHA1_CHUNK_SIZE_BYTES
-    jb .medium
-    ; cmp len*8, 448 (len: 56)
-    ; jb `call makeChunk; call digest; ret
-    ; cmp len*8, 512
-    ; jb same as above but without message length inside
-
-
-.short:
-    push dword [ebp+12]
-    push dword [ebp+8]
-    call makeChunk
-    push dword [ebp+8]
-    call addLen
-    push dword [ebp+16]
-    call digest
-    jmp .end
-.medium:
-    push dword [ebp+12]
-    push dword [ebp+8]
-    call makeChunk
-    push dword [ebp+16]
-    call digest
-
-    push dword chunk
-    push dword 0x0
-    push dword SHA1_CHUNK_SIZE_BYTES
-    call memset
-    push dword [ebp+8]
-    call addLen
-
     mov eax, [sha1_h0]
     bswap eax
     mov [sha1_h0], eax
@@ -513,8 +461,98 @@ sha1:
     bswap eax
     mov [sha1_h4], eax
 
+    pop eax
+    pop ebx
+    pop ecx
+    pop esi
+    pop ebp
+    ret 4
+
+sha1_reset_h:
+    mov dword [sha1_h0], SHA1_H0_DEFAULT
+    mov dword [sha1_h1], SHA1_H1_DEFAULT
+    mov dword [sha1_h2], SHA1_H2_DEFAULT
+    mov dword [sha1_h3], SHA1_H3_DEFAULT
+    mov dword [sha1_h4], SHA1_H4_DEFAULT
+    ret
+
+sha1_invalid_length: db "Invalid msg length given: ", 0
+sha1:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push edi
+    push esi
+    
+    call sha1_reset_h
+    mov esi, [ebp+8]
+.cmp_start:
+    cmp dword esi, 0
+    jb .out_bounds
+    cmp dword [ebp+8], 56
+    jb .short
+    cmp dword [ebp+8], SHA1_CHUNK_SIZE_BYTES
+    jb .medium
+    jmp .long
+
+.short:
+    push dword [ebp+12]
+    push dword [ebp+8]
+    call makeChunk
+    push dword esi ;[ebp+8]
+    call addLen
     push dword [ebp+16]
     call digest
+    jmp .end
+.medium:
+    push dword [ebp+12]
+    push dword [ebp+8]
+    call makeChunk
+    push dword [ebp+16]
+    call digest
+
+    push dword chunk
+    push dword 0x0
+    push dword SHA1_CHUNK_SIZE_BYTES
+    call memset
+    push dword esi ;[ebp+8]
+    call addLen
+
+    push dword [ebp+16]
+    call digest
+    jmp .end
+.long:
+    ; copying message into buffer
+    mov eax, SHA1_CHUNK_SIZE_BYTES
+    mov ebx, [ebp+12]; message*
+    push dword chunk
+    push ebx
+    push eax
+    call memcpy
+    add esp, 4
+    push dword [ebp+16]
+    call digest
+    sub dword [ebp+8], SHA1_CHUNK_SIZE_BYTES
+    add dword [ebp+12], SHA1_CHUNK_SIZE_BYTES
+    jmp .cmp_start
+.out_bounds:
+    push dword sha1_invalid_length
+    call printMessage
+    mov eax, esi
+    sub esp, 4
+    mov edi, esp
+    bswap eax
+    mov dword [edi], eax
+    push dword 4        ; print the full register (32 bit)
+    push edi
+    call printHex
+    call printTerminator
+    call exit
 .end:
+    pop esi
+    pop edi
+    pop ebx
+    pop eax
     pop ebp
     ret 12
