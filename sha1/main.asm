@@ -6,6 +6,9 @@ section .data
     msg_length_bytes dd 5
     msg2 db "hello world!", 0
     msg2_length_bytes dd 12
+    ;dGhl
+    msg3 db "IHNhbXBsZSBub25jZQ==258EAFA5-E914-47DA-95CA-C5AB0DC85B11", 0
+    msg3_length_bytes dd 56
 
 section .bss
     output: resb SHA1_OUTPUT_SIZE_BYTES
@@ -20,16 +23,30 @@ _start:
     push str
     call printMessage
 
-    push dword msg2
-    push dword [msg2_length_bytes]
-    call makeChunk
     push output
-    call digest
+    push dword msg
+    push dword [msg_length_bytes]
+    call sha1
 
     push dword SHA1_OUTPUT_SIZE_BYTES
     push output
     call printHex
 
     call printTerminator
+
+    push str
+    call printMessage
+
+    push output
+    push dword msg3
+    push dword [msg3_length_bytes]
+    call sha1
+
+    push dword SHA1_OUTPUT_SIZE_BYTES
+    push output
+    call printHex
+
+    call printTerminator
+
 
     call exit

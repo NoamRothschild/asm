@@ -12,11 +12,17 @@ section .data
     SHA1_K_CONST3 equ 0x8F1BBCDC
     SHA1_K_CONST4 equ 0xCA62C1D6
 
-    SHA1_H0 equ 0x67452301
-    SHA1_H1 equ 0xEFCDAB89
-    SHA1_H2 equ 0x98BADCFE
-    SHA1_H3 equ 0x10325476
-    SHA1_H4 equ 0xC3D2E1F0
+    SHA1_H0_DEFAULT equ 0x67452301
+    SHA1_H1_DEFAULT equ 0xEFCDAB89
+    SHA1_H2_DEFAULT equ 0x98BADCFE
+    SHA1_H3_DEFAULT equ 0x10325476
+    SHA1_H4_DEFAULT equ 0xC3D2E1F0
+    
+    sha1_h0 dd SHA1_H0_DEFAULT
+    sha1_h1 dd SHA1_H1_DEFAULT
+    sha1_h2 dd SHA1_H2_DEFAULT
+    sha1_h3 dd SHA1_H3_DEFAULT
+    sha1_h4 dd SHA1_H4_DEFAULT
 
 section .bss
     chunk: resb SHA1_CHUNK_SIZE_BYTES ; reserve 512 bits
@@ -48,6 +54,20 @@ makeChunk:
     ; adding "1" to the message. see SHA-1 RFC section 4.a
     mov byte [edx], 10000000b
 
+    pop edx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 8
+
+; adds the given length in bytes to the end of the chunk
+addLen:
+    push ebp
+    mov ebp, esp
+    push edx
+    push ebx
+    push eax
+
     ; adding the length of the message into the chunk. see SHA-1 RFC section 4.c
     xor edx, edx
     mov ebx, [ebp+8]
@@ -59,11 +79,11 @@ makeChunk:
     mov dword [chunk + SHA1_CHUNK_DATA_LEN / 8], edx
     mov dword [chunk + 4 + SHA1_CHUNK_DATA_LEN / 8], eax
 
-    pop edx
-    pop ebx
     pop eax
+    pop ebx
+    pop edx
     pop ebp
-    ret 8
+    ret 4
 
 ; memcpy(dest*, src*, byte_length) 
 ; returns end of message ptr
@@ -329,11 +349,16 @@ digest:
     ; edi+16 - E
     ; edi+20 - TEMP
 
-    mov dword [edi+0 ], SHA1_H0
-    mov dword [edi+4 ], SHA1_H1
-    mov dword [edi+8 ], SHA1_H2
-    mov dword [edi+12], SHA1_H3
-    mov dword [edi+16], SHA1_H4
+    mov esi, [sha1_h0]
+    mov dword [edi+0 ], esi
+    mov esi, [sha1_h1]
+    mov dword [edi+4 ], esi
+    mov esi, [sha1_h2]
+    mov dword [edi+8 ], esi
+    mov esi, [sha1_h3]
+    mov dword [edi+12], esi
+    mov esi, [sha1_h4]
+    mov dword [edi+16], esi
 
     xor ecx, ecx
 .section_d:
@@ -387,27 +412,27 @@ digest:
 
     mov eax, [ebp+8] ; output buffer
 
-    mov ebx, SHA1_H0
+    mov ebx, [sha1_h0]
     add ebx, [edi+0]
     bswap ebx
     mov [eax], ebx
 
-    mov ebx, SHA1_H1
+    mov ebx, [sha1_h1]
     add ebx, [edi+4]
     bswap ebx
     mov [eax+4], ebx
 
-    mov ebx, SHA1_H2
+    mov ebx, [sha1_h2]
     add ebx, [edi+8]
     bswap ebx
     mov [eax+8], ebx
 
-    mov ebx, SHA1_H3
+    mov ebx, [sha1_h3]
     add ebx, [edi+12]
     bswap ebx
     mov [eax+12], ebx
 
-    mov ebx, SHA1_H4
+    mov ebx, [sha1_h4]
     add ebx, [edi+16]
     bswap ebx
     mov [eax+16], ebx
@@ -418,4 +443,56 @@ digest:
     pop ecx
     pop esi
     pop ebp
+    ret 4
+
+sha1_reset_h:
+    mov dword [sha1_h0], SHA1_H0_DEFAULT
+    mov dword [sha1_h1], SHA1_H1_DEFAULT
+    mov dword [sha1_h2], SHA1_H2_DEFAULT
+    mov dword [sha1_h3], SHA1_H3_DEFAULT
+    mov dword [sha1_h4], SHA1_H4_DEFAULT
     ret
+
+sha1:
+    push ebp
+    mov ebp, esp
+    
+    call sha1_reset_h
+
+    cmp dword [ebp+8], 56
+    jb .short
+    cmp dword [ebp+8], SHA1_CHUNK_SIZE_BYTES
+    jb .medium
+    ; cmp len*8, 448 (len: 56)
+    ; jb `call makeChunk; call digest; ret
+    ; cmp len*8, 512
+    ; jb same as above but without message length inside
+
+
+.short:
+    push dword [ebp+12]
+    push dword [ebp+8]
+    call makeChunk
+    push dword [ebp+8]
+    call addLen
+    push dword [ebp+16]
+    call digest
+    jmp .end
+.medium:
+    push dword [ebp+12]
+    push dword [ebp+8]
+    call makeChunk
+    push dword [ebp+16]
+    call digest
+
+    push dword chunk
+    push dword 0x0
+    push dword SHA1_CHUNK_SIZE_BYTES
+    call memset
+    push dword [ebp+8]
+    call addLen
+    push dword [ebp+16]
+    call digest
+.end:
+    pop ebp
+    ret 12
