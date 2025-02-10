@@ -1,0 +1,101 @@
+{
+    "common": {
+        "debug": {
+            "printBin": {
+                "description": "prints given memory buffer bytes in binary format",
+                "params": ["[#] amm of bytes to print", "[&] buffer pointer"],
+                "return": []
+            },
+            "printHex": {
+                "description": "prints given memory buffer bytes in hexadecimal format",
+                "params": ["[#] amm of bytes to print", "[&] buffer pointer"],
+                "return": []
+            }
+        },
+        "general": {
+            "printInt": {
+                "description": "prints given integer value in decimal format",
+                "params": ["[#] amm of bytes to print"],
+                "return": []
+            },
+            "printTerminator": {
+                "description": "prints an end of line character to stdout",
+                "params": [],
+                "return": []
+            },
+            "printChar": {
+                "description": "prints given character to stdout encoded as ASCII",
+                "params": ["[#] ASCII byte, zero-padded into 32-bit"],
+                "return": []
+            },
+            "igetLength": {
+                "description": "returns the length of a C like string (NULL terminated)",
+                "params": ["[&] buffer pointer"],
+                "return": ["[#] length of the string"]
+            },
+            "printMessage": {
+                "description": "prints given C like string string to stdout encoded as ASCII (NULL terminated)",
+                "params": ["[&] buffer pointer"],
+                "return": []
+            },
+            "sreadInput": {
+                "description": "reads up to 255 bytes from stdin into buffer",
+                "params": ["[&] buffer pointer"],
+                "return": []
+            }
+        }
+    },
+    "b64": {
+        "b64": {
+            "b64_encode": {
+                "description": "encodes the given bytearray & stores into buffer",
+                "params": ["[#] length of message", "[&] dest buffer pointer", "[&] src buffer pointer"],
+                "return": []
+            }
+        }
+    },
+    "sha1": {
+        "sha1": {
+            "addLen": {
+                "description": "adds the given length in bytes to the end of the chunk",
+                "params": ["[#] length of message (in bytes)"],
+                "return": []
+            },
+            "memcpy": {
+                "description": "copies given amount of bytes from src buffer to dest buffer",
+                "params": ["[&] dest buffer pointer", "[&] src buffer pointer", "[#] length of message"],
+                "return": ["[&] end of message pointer"]
+            },
+            "memset": {
+                "description": "sets all data in given range to given byte",
+                "params": ["[&] dest buffer pointer", "[#] the byte, zero-padded into 32-bit", "[#] length of message"],
+                "return": []
+            },
+            "function_f": {
+                "description": "internal sha1 function that calculates f(t;B,C,D)",
+                "params": ["[#] t", "[#] B", "[#] C", "[#] D"],
+                "return": ["[#] calculated value"]
+            },
+            "constants_k": {
+                "description": "internal sha1 function that returns K(t) const based on t",
+                "params": ["[#] t"],
+                "return": ["[#] calculated const value"]
+            },
+            "digest": {
+                "description": "digests loaded chunk from before and returns the digest using last used h's values",
+                "params": ["[&] 20 byte buffer pointer"],
+                "return": []
+            },
+            "sha1_reset_h": {
+                "description": "resets the h's values to the default ones",
+                "params": ["[&] 20 byte dest buffer pointer"],
+                "return": []
+            },
+            "sha1": {
+                "description": "hashes the given bytearray using sha-1",
+                "params": ["[&] 20 byte dest buffer pointer", "[&] src bytearray pointer", "[#] amm of bytes to process"],
+                "return": []
+            }
+        }
+    }
+}

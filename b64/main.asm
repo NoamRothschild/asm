@@ -1,5 +1,5 @@
 %include '../common/general.asm'
-%include 'lib.asm'
+%include 'b64.asm'
 
 section .data
     msg db 'encode me!', 0

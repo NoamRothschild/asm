@@ -1,6 +1,6 @@
 %include '../common/general.asm'
 %include '../common/debug.asm'
-%include 'sha1_utils.asm'
+%include 'sha1.asm'
 section .data
     msg db 01100001b, 01100010b, 01100011b, 01100100b, 01100101b ; example msg from RFC
     msg_length_bytes dd 5
