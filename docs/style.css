@@ -1,0 +1,62 @@
+body {
+    background-color: #1E1E1E;
+    font-family: 'Inter', sans-serif;
+}
+.label,
+#title {
+    color: white;
+    position: relative;
+    left: 20%;
+    max-width: 50%;
+}
+.padded {
+    left: 22.5%;
+}
+details {
+    background-color: #1B2735;
+    margin-left: 25%;
+    max-width: 50%;
+    margin-bottom: 20px;
+
+    padding: 10px;
+
+    border: 2px solid #363636;
+    border-radius: 5px;
+    color: #14AC79;
+
+    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+    max-height: calc(2em + 10px);
+    overflow: hidden;
+}
+details[open] {
+    max-height: 500px; /* Large enough for content */
+    padding-bottom: 10px;
+}
+summary {
+    color: #027AFF;
+}
+.description {
+    color: white;
+    margin-top: 2px;
+}
+.returns-label,
+.params-label {
+    margin-bottom: 5px;
+}
+.returns,
+.params {
+    margin-top: 0;
+}
+ul.returns,
+ul.params {
+    list-style-type: none; /* Removes default bullets */
+    color: #257FDC;
+}
+ul.returns li::before,
+ul.params li::before {
+    content: attr(data-marker); /* Sets the content from a custom attribute */
+    font-weight: bold; /* Optional: makes the character bold */
+    margin-right: 8px; /* Space between the character and the list item text */
+    /* color: #E32D1E; */
+    color: #257FDC;
+}

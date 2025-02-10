@@ -1,6 +1,6 @@
 {
-    "common": {
-        "debug": {
+    "common/": {
+        "debug.asm": {
             "printBin": {
                 "description": "prints given memory buffer bytes in binary format",
                 "params": ["[#] amm of bytes to print", "[&] buffer pointer"],
@@ -12,7 +12,7 @@
                 "return": []
             }
         },
-        "general": {
+        "general.asm": {
             "printInt": {
                 "description": "prints given integer value in decimal format",
                 "params": ["[#] amm of bytes to print"],
@@ -45,8 +45,8 @@
             }
         }
     },
-    "b64": {
-        "b64": {
+    "b64/": {
+        "b64.asm": {
             "b64_encode": {
                 "description": "encodes the given bytearray & stores into buffer",
                 "params": ["[#] length of message", "[&] dest buffer pointer", "[&] src buffer pointer"],
@@ -54,8 +54,13 @@
             }
         }
     },
-    "sha1": {
-        "sha1": {
+    "sha1/": {
+        "sha1.asm": {
+            "sha1": {
+                "description": "hashes the given bytearray using sha-1",
+                "params": ["[&] 20 byte dest buffer pointer", "[&] src bytearray pointer", "[#] amm of bytes to process"],
+                "return": []
+            },
             "addLen": {
                 "description": "adds the given length in bytes to the end of the chunk",
                 "params": ["[#] length of message (in bytes)"],
@@ -89,11 +94,6 @@
             "sha1_reset_h": {
                 "description": "resets the h's values to the default ones",
                 "params": ["[&] 20 byte dest buffer pointer"],
-                "return": []
-            },
-            "sha1": {
-                "description": "hashes the given bytearray using sha-1",
-                "params": ["[&] 20 byte dest buffer pointer", "[&] src bytearray pointer", "[#] amm of bytes to process"],
                 "return": []
             }
         }
