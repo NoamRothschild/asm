@@ -10,6 +10,8 @@ section .data
     msg3_length_bytes dd 60
     msg4 db "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut magni aliquam beatae esse quos dolorem, quis nostrum inventore ad sed. Omnis eum distinctio fuga ratione veniam cumque culpa error itaque.", 0
     msg4_length_bytes dd 200
+    msg5 db "", 0
+    msg5_length_bytes dd 0
 
 section .bss
     output: resb SHA1_OUTPUT_SIZE_BYTES
@@ -57,6 +59,17 @@ _start:
     push output
     push dword msg4
     push dword [msg4_length_bytes]
+    call sha1
+    push str
+    call printMessage
+    push dword SHA1_OUTPUT_SIZE_BYTES
+    push output
+    call printHex
+    call printTerminator
+
+push output
+    push dword msg5
+    push dword [msg5_length_bytes]
     call sha1
     push str
     call printMessage
