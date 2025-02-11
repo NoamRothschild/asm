@@ -43,6 +43,18 @@
                 "params": ["[&] buffer pointer"],
                 "return": []
             }
+        },
+        "threading.asm": {
+            "fork": {
+                "description": "creates a child process to the process ran by",
+                "params": [],
+                "return": ["[#] process type identifer (when 0 executor is child process, else parent)"]
+            },
+            "close_terminated": {
+                "description": "closes terminated child processes since just calling exit is not enough",
+                "params": [],
+                "return": []
+            }
         }
     },
     "b64/": {
@@ -96,6 +108,45 @@
                 "params": ["[&] 20 byte dest buffer pointer"],
                 "return": []
             }
+        }
+    },
+    "sockets/": {
+        "sockets.asm": {
+            "createSocket": {
+            "description": "creates a socket and returns its file descriptor",
+            "params": [],
+            "return": ["[#] a file descriptor for the socket"]
+           },
+           "bindSocket": {
+            "description": "binds a socket to a port and a host",
+            "params": ["[#] socket file descriptor"],
+            "return": []
+           },
+           "listenSocket": {
+            "description": "invokes listen on given socket with a max queue length of 10",
+            "params": ["[#] socket file descriptor"],
+            "return": []
+           },
+           "acceptSocket": {
+            "description": "wait until a client has sent data to the socket",
+            "params": ["[#] socket file descriptor"],
+            "return": ["[#] connected socket file descriptor"]
+           },
+           "readSocket": {
+            "description": "reads the given socket file descriptor and stores its data in buffer",
+            "params": ["[#] amm of bytes to read", "[#] connected socket file descriptor", "[&] buffer pointer"],
+            "return": []
+           },
+           "writeSocket": {
+            "description": "writes to the given socket file descriptor the given buffer",
+            "params": ["[#] amm of bytes to write", "[#] connected socket file descriptor", "[&] buffer pointer"],
+            "return": []
+           },
+           "closeSocket": {
+            "description": "closes the given socket via its file descriptor",
+            "params": ["[#] socket file descriptor"],
+            "return": []
+           }
         }
     }
 }

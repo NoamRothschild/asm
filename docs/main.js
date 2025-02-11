@@ -31,7 +31,7 @@ function addFunctionElement(funcName, description, paramsList=[], returnList=[])
     }
 
     if (returnList.length > 0) {
-        let paramsHTML = paramsList.map(param => `<li>${param}</li>`).join("");
+        let paramsHTML = returnList.map(param => `<li>${param}</li>`).join("");
         let paramsContainer = document.createElement("ul");
         paramsContainer.classList.add("returns");
         paramsContainer.innerHTML = paramsHTML;
