@@ -23,7 +23,7 @@ if [ -f "bin/$1" ]; then
   rm "bin/$1"
 fi
 
-trap 'kill $pid' SIGINT
+trap 'kill -9 $pid $(pgrep -P $pid)' SIGINT
 
 # Compile with the C libraries
 # req dependencies: "apt install gcc-multilib"
