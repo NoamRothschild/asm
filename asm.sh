@@ -23,6 +23,8 @@ if [ -f "bin/$1" ]; then
   rm "bin/$1"
 fi
 
+trap 'kill $pid' SIGINT
+
 # Compile with the C libraries
 # req dependencies: "apt install gcc-multilib"
 # 
@@ -32,7 +34,10 @@ fi
 nasm -f elf "$1.asm"
 ld -m elf_i386 "$1.o" -o "$1"
 
-./"$1" "${@:2}"
+./"$1" "${@:2}" &
+pid=$!
+
+wait $pid
 
 mv "$1" "bin"
 mv "$1.o" "bin"
