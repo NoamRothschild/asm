@@ -38,6 +38,11 @@
                 "params": ["[&] buffer pointer"],
                 "return": ["[#] length of the string"]
             },
+            "exit": {
+                "description": "exit with status code 0",
+                "params": [],
+                "return": []
+            },
             "sreadInput": {
                 "description": "reads up to 255 bytes from stdin into buffer",
                 "params": ["[&] buffer pointer"],
@@ -53,6 +58,23 @@
             "close_terminated": {
                 "description": "closes terminated child processes since just calling exit is not enough",
                 "params": [],
+                "return": []
+            }
+        },
+        "string.asm": {
+            "strlen": {
+                "description": "returns the length of a C like string (NULL terminated)",
+                "params": ["[&] buffer pointer"],
+                "return": ["[#] length of the string"]
+            },
+            "sprintf": {
+                "description": "stores formatted print (%s) in given buffer. replaces each '%' with next param",
+                "params": ["[&?] optional string buffer (as many as you want, reverse order)", "[&] string termplate buffer", "[&] dest buffer pointer"],
+                "return": []
+            },
+            "toString": {
+                "description": "takes the given 4 byte value and turn it into a string (base 10)",
+                "params": ["[#] the value to be converted", "[&] buffer pointer"],
                 "return": []
             }
         }

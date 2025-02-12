@@ -174,4 +174,4 @@ printInt:
     pop ebx
     pop eax
     pop ebp
-    ret
+    ret 4
