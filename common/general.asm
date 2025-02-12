@@ -1,71 +1,3 @@
-printInt: ;(int)
-	push ebp
-	mov ebp, esp
-	push eax
-	push edx
-	push ecx
-	push ebx
-
-	mov eax, [ebp+8]
-	xor ecx, ecx ; counter set to 0
-.iPrintLoop:
-	cmp eax, 0
-	jz .iPrintEnd
-
-	mov bl, 10
-	div bl
-
-	; printing the character
-	xor edx, edx
-	mov dl, ah
-	add dl, '0'
- 	push edx
-	inc ecx ; add 1 to the counter
- 	;call printChar
-
-	xor ah, ah
-	jmp .iPrintLoop
-.iPrintEnd:
-
-	.iPrintPrint:
-	call printChar
-	loop .iPrintPrint
-	pop ebx
-	pop ecx
-	pop edx
-    pop eax
-    pop ebp
-    ret 4
-
-printTerminator:
-	push 0Ah
-	call printChar
-	ret
-
-printChar:
-	push ebp
-    mov ebp, esp
-    push eax
-    push ecx
-	push edx
-	push ebx
-
-	mov eax, [ebp+8]
-	push eax
-	mov edx, 1
-	mov ecx, esp
-	mov ebx, 1
-	mov eax, 4
-	int 80h
-	pop eax
-
-	pop ebx
-	pop edx
-    pop ecx
-	pop eax
-	pop ebp
-	ret 4
-
 igetLength:
 	push ebp
 	mov ebp, esp
@@ -86,34 +18,6 @@ igetLength:
 	pop eax
 	pop ebp
 	ret
-
-printMessage: ;(offset msg)
-	push ebp
-	mov ebp, esp
-	push ecx
-	push edx
-	push ebx
-	push eax
-
-	mov ecx, [ebp+8] ; first given argument
-
-	push ecx
-	call igetLength
-	pop edx
-
-	mov ebx, 1		; write to STDOUT
-	mov eax, 4		; invokes SYS_WRITE (kernel opcode 4)
-	int 80h
-
-	;call printTerminator
-
-	pop eax
-	pop ebx
-	pop edx
-	pop ecx
-	pop ebp
-	ret 4
-
 
 chrtoi:
     push    ebx             ; preserve ebx on the stack to be restored after function runs

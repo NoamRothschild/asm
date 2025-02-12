@@ -1,4 +1,5 @@
 %include '../common/general.asm'
+%include '../common/debug.asm'
 %include '../common/threading.asm'
 %include 'sockets.asm'
 section .data

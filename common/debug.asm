@@ -1,4 +1,56 @@
-; NOTE: `general.asm` must be included before including this file.
+printChar:
+	push ebp
+    mov ebp, esp
+    push eax
+    push ecx
+	push edx
+	push ebx
+
+	mov eax, [ebp+8]
+	push eax
+	mov edx, 1
+	mov ecx, esp
+	mov ebx, 1
+	mov eax, 4
+	int 80h
+	pop eax
+
+	pop ebx
+	pop edx
+    pop ecx
+	pop eax
+	pop ebp
+	ret 4
+
+printMessage: ;(offset msg)
+	push ebp
+	mov ebp, esp
+	push ecx
+	push edx
+	push ebx
+	push eax
+
+	mov ecx, [ebp+8] ; first given argument
+
+	push ecx
+	call igetLength
+	pop edx
+
+	mov ebx, 1		; write to STDOUT
+	mov eax, 4		; invokes SYS_WRITE (kernel opcode 4)
+	int 80h
+
+	pop eax
+	pop ebx
+	pop edx
+	pop ecx
+	pop ebp
+	ret 4
+
+printTerminator:
+	push 0Ah
+	call printChar
+	ret
 
 printBin:
     push ebp
@@ -78,12 +130,6 @@ loop .byteLoop
     call printChar
     xor esi, esi
 .skipPadding:
-    ;push ecx            ; TEMPORARY
-    ;mov ecx, 7          ; TEMPORARY
-;.printPadding:          ; TEMPORARY
-    ;loop .printPadding  ; TEMPORARY
-    ;pop ecx             ; TEMPORARY
-
     inc ebx
     pop ecx
 loop .dataLoop
@@ -95,3 +141,37 @@ loop .dataLoop
     pop eax
     pop ebp
     ret 8
+
+printInt:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    mov eax, [ebp+8] ; number
+    xor ecx, ecx
+.digitLoop:
+    inc ecx
+
+    xor edx, edx
+    mov ebx, 10
+    div ebx
+    
+    add edx, '0'
+    push edx
+
+    cmp eax, 0
+    jz .loopEnd
+    jmp .digitLoop
+.loopEnd:
+    call printChar
+    loop .loopEnd
+.end:
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp
+    ret

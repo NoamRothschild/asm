@@ -1,4 +1,5 @@
 %include '../common/general.asm'
+%include '../common/debug.asm'
 %include 'b64.asm'
 
 section .data

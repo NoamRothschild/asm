@@ -1,6 +1,21 @@
 {
     "common/": {
         "debug.asm": {
+            "printChar": {
+                "description": "prints given character to stdout encoded as ASCII",
+                "params": ["[#] ASCII byte, zero-padded into 32-bit"],
+                "return": []
+            },
+            "printMessage": {
+                "description": "prints given C like string string to stdout encoded as ASCII (NULL terminated)",
+                "params": ["[&] buffer pointer"],
+                "return": []
+            },
+            "printTerminator": {
+                "description": "prints an end of line character to stdout",
+                "params": [],
+                "return": []
+            },
             "printBin": {
                 "description": "prints given memory buffer bytes in binary format",
                 "params": ["[#] amm of bytes to print", "[&] buffer pointer"],
@@ -10,33 +25,18 @@
                 "description": "prints given memory buffer bytes in hexadecimal format",
                 "params": ["[#] amm of bytes to print", "[&] buffer pointer"],
                 "return": []
-            }
-        },
-        "general.asm": {
+            },
             "printInt": {
                 "description": "prints given integer value in decimal format",
                 "params": ["[#] amm of bytes to print"],
                 "return": []
-            },
-            "printTerminator": {
-                "description": "prints an end of line character to stdout",
-                "params": [],
-                "return": []
-            },
-            "printChar": {
-                "description": "prints given character to stdout encoded as ASCII",
-                "params": ["[#] ASCII byte, zero-padded into 32-bit"],
-                "return": []
-            },
+            }
+        },
+        "general.asm": {
             "igetLength": {
                 "description": "returns the length of a C like string (NULL terminated)",
                 "params": ["[&] buffer pointer"],
                 "return": ["[#] length of the string"]
-            },
-            "printMessage": {
-                "description": "prints given C like string string to stdout encoded as ASCII (NULL terminated)",
-                "params": ["[&] buffer pointer"],
-                "return": []
             },
             "sreadInput": {
                 "description": "reads up to 255 bytes from stdin into buffer",
