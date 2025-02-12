@@ -19,6 +19,59 @@ igetLength:
 	pop ebp
 	ret
 
+; memcpy(dest*, src*, byte_length) 
+; returns end of message ptr
+memcpy:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push ecx
+    mov eax, [ebp+12] ; load src*
+    mov ebx, [ebp+16] ; load dest*
+    add [ebp+8], ebx ; load end*
+.copyChar:
+    mov cl, byte [eax]
+    mov byte [ebx], cl
+
+    cmp ebx, [ebp+8]
+    jz .end
+
+    inc ebx
+    inc eax
+    jmp .copyChar
+.end:
+    mov [ebp+16], ebx
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 8
+
+; memset(dest*, byte, byte_length)
+; sets all data in given range to given byte
+memset:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push ecx
+    
+    mov ebx, [ebp+16] ; load dest*
+    mov eax, [ebp+12] ; load byte
+    mov ecx, [ebp+8]  ; load bytes count
+
+.copyChar:
+    mov byte [ebx], al
+    inc ebx
+    loop .copyChar
+
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 12
+
 chrtoi:
     push    ebx             ; preserve ebx on the stack to be restored after function runs
     push    ecx             ; preserve ecx on the stack to be restored after function runs

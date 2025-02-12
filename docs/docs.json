@@ -28,7 +28,7 @@
             },
             "printInt": {
                 "description": "prints given integer value in decimal format",
-                "params": ["[#] amm of bytes to print"],
+                "params": ["[#] a 32 bit value"],
                 "return": []
             }
         },
@@ -37,6 +37,16 @@
                 "description": "returns the length of a C like string (NULL terminated)",
                 "params": ["[&] buffer pointer"],
                 "return": ["[#] length of the string"]
+            },
+            "memcpy": {
+                "description": "copies given amount of bytes from src buffer to dest buffer",
+                "params": ["[&] dest buffer pointer", "[&] src buffer pointer", "[#] length of message"],
+                "return": ["[&] end of message pointer"]
+            },
+            "memset": {
+                "description": "sets all data in given range to given byte",
+                "params": ["[&] dest buffer pointer", "[#] the byte, zero-padded into 32-bit", "[#] length of message"],
+                "return": []
             },
             "exit": {
                 "description": "exit with status code 0",
@@ -76,6 +86,53 @@
                 "description": "takes the given 4 byte value and turn it into a string (base 10)",
                 "params": ["[#] the value to be converted", "[&] buffer pointer"],
                 "return": []
+            },
+            "strcmp": {
+                "description": "checks if 2 strings are equal",
+                "params": ["[&] string pointer 1", "[&] string pointer 2"],
+                "return": ["[#] (0 ? 1) - (false ? true)"]
+            }
+        },
+        "fileManager.asm": {
+            "newFile": {
+                "description": "creates a new file on disk with 777 perms given filename",
+                "params": ["[&] filename pointer"],
+                "return": ["[#] file descriptor"]
+            },
+            "writeFile": {
+                "description": "creates a new file and stores given string inside it",
+                "params": ["[&] filename pointer", "[&] string data buffer pointer"],
+                "return": []
+            },
+            "openFile": {
+                "description": "returns file descriptor given a path (or -1 if any error occur)",
+                "params": ["[&] filename pointer"],
+                "return": ["[#] file descriptor"]
+            },
+            "readFile": {
+                "description": "stores file contents given a file descriptor, location to store in and number of bytes",
+                "params": ["[#] file descriptor", "[&] dest buffer pointer", "[#] amm of bytes to read"],
+                "return": []
+            },
+            "closeFile": {
+                "description": "closes a file given a file descriptor",
+                "params": ["[#] file descriptor"],
+                "return": []
+            },
+            "deleteFile": {
+                "description": "deletes a file given a file descriptor",
+                "params": ["[&] filename pointer"],
+                "return": []
+            },
+            "appendFile": {
+                "description": "appends the given string to the end of the file",
+                "params": ["[#] file descriptor", "[&] string data buffer pointer"],
+                "return": []
+            },
+            "iLengthFile": {
+                "description": "returns the length of a file, or -1 on error",
+                "params": ["[&] filename pointer"],
+                "return": ["[#] length of the file (in bytes)"]
             }
         }
     },
@@ -98,16 +155,6 @@
             "addLen": {
                 "description": "adds the given length in bytes to the end of the chunk",
                 "params": ["[#] length of message (in bytes)"],
-                "return": []
-            },
-            "memcpy": {
-                "description": "copies given amount of bytes from src buffer to dest buffer",
-                "params": ["[&] dest buffer pointer", "[&] src buffer pointer", "[#] length of message"],
-                "return": ["[&] end of message pointer"]
-            },
-            "memset": {
-                "description": "sets all data in given range to given byte",
-                "params": ["[&] dest buffer pointer", "[#] the byte, zero-padded into 32-bit", "[#] length of message"],
                 "return": []
             },
             "function_f": {
