@@ -18,6 +18,41 @@ strlen:
 	pop ebp
     ret
 
+; strcpy(location*, msg*) 
+; returns end of message ptr
+strcpy:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push ecx
+
+    mov eax, [ebp+8] ; load msg*
+    lea eax, [eax]
+
+    mov ebx, [ebp+12] ; load location*
+    lea ebx, [ebx]
+
+.copyChar:
+    mov cl, byte [eax]
+    mov byte [ebx], cl
+
+    cmp cl, 0
+    jz .end
+
+    inc ebx
+    inc eax
+    jmp .copyChar
+
+.end:
+    mov [ebp+12], ebx
+
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 4
+
 sprintf:
     push ebp
     mov ebp, esp
@@ -98,6 +133,44 @@ toString:
 .end:
     pop edi
     pop edx
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 8
+
+; checks if 2 strings are equal (0 ? 1)
+strcmp:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push ecx
+
+    mov eax, [ebp+8] ; a
+    mov ebx, [ebp+12] ; b
+    mov dword [ebp+12], 1 ; assume equality
+.nextChar:
+    mov cl, byte [eax]
+    cmp cl, byte [ebx]
+
+    jnz .fail
+
+    inc ebx
+    inc eax
+    cmp byte [eax], 0 ; End of string
+    jz .lenCheck
+    cmp byte [ebx], 0 ; End of string
+    jz .lenCheck
+    jmp .nextChar
+.lenCheck: ; gets here only if one of them ended
+    mov cl, byte [eax]
+    cmp cl, byte [ebx]
+    jz .end
+
+.fail:
+    mov dword [ebp+12], 0
+.end:
     pop ecx
     pop ebx
     pop eax
