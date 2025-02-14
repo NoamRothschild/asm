@@ -10,7 +10,9 @@ section .data
 
 section .bss
     buffer: resb 4096
+    _tmp: resb 1 ; here only for easier printing since I rely on null terminators
     request_struct: resb REQ_TOTAL_SIZE
+    _tmp2: resb 1 ; here only for easier printing since I rely on null terminators
 
 section .text
 global _start
@@ -53,6 +55,10 @@ _start:
     push esi ; connected socket identifying descriptor
 	push buffer
 	call readSocket
+
+    push ANSI_YELLOW
+    push buffer
+    call printColored
     
     push buffer
     push request_struct
