@@ -7,7 +7,7 @@
                 "return": []
             },
             "printMessage": {
-                "description": "prints given C like string string to stdout encoded as ASCII (NULL terminated)",
+                "description": "prints given C like string to stdout encoded as ASCII (NULL terminated)",
                 "params": ["[&] buffer pointer"],
                 "return": []
             },
@@ -42,8 +42,13 @@
                 "return": []
             },
             "printColored": {
-                "description": "in given color, prints given C like string string to stdout encoded as ASCII (NULL terminated)",
+                "description": "in given color, prints given C like string to stdout encoded as ASCII (NULL terminated)",
                 "params": ["[&] ANSI Color pointer", "[&] buffer pointer"],
+                "return": []
+            },
+            "printUntil": {
+                "description": "prints a string of ASCII characters to stdout ending with given character",
+                "params": ["[&] buffer pointer", "[#] terminator character"],
                 "return": []
             }
         },
@@ -106,6 +111,16 @@
                 "description": "checks if 2 strings are equal",
                 "params": ["[&] string pointer 1", "[&] string pointer 2"],
                 "return": ["[#] (0 ? 1) - (false ? true)"]
+            },
+            "startswith": {
+                "description": "returns if string 1 starts with string 2 (assumes strlen(1) > strlen(2))",
+                "params": ["[&] string pointer 1", "[&] string pointer 2"],
+                "return": ["[#] (0 ? 1) - (false ? true)"]
+            },
+            "strstr": {
+                "description": "locates a substring in a string",
+                "params": ["[&] string pointer", "[&] substring pointer"],
+                "return": ["[&] substring start pointer (or NULL if not found)"]
             }
         },
         "fileManager.asm": {
@@ -231,6 +246,33 @@
             "params": ["[#] socket file descriptor"],
             "return": []
            }
+        },
+        "http.asm": {
+            "requestStruct": {
+                "description": "creates a special struct from the parsed HTTP client request",
+                "params": ["[&] HTTP request buffer pointer", "[&] struct pointer (length must be above REQ_TOTAL_SIZE)"],
+                "return": []
+            },
+            "printStruct": {
+                "description": "prints a formatted debugging message based from the given struct",
+                "params": ["[&] struct pointer (length must be above REQ_TOTAL_SIZE)"],
+                "return": []
+            },
+            "parseHeaders": {
+                "description": "modifies request struct based on request headers",
+                "params": ["[&] HTTP request buffer pointer", "[&] struct pointer (length must be above REQ_TOTAL_SIZE)"],
+                "return": []
+            },
+            "printHeaders": {
+                "description": "parses and prints all headers with different color codes",
+                "params": ["[&] HTTP request buffer pointer"],
+                "return": []
+            },
+            "getMethodType": {
+                "description": "returns the const of the const representing it from the string-like representation",
+                "params": ["[&] suspected method pointer"],
+                "return": ["[#] the const representing the method type, or -1 if method not found (for values, lookup: METHOD_GET / METHOD_POST / ...)"]
+            }
         }
     }
 }

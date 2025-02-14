@@ -176,3 +176,70 @@ strcmp:
     pop eax
     pop ebp
     ret 4
+
+; src str, str2 - (0 ? 1) =? does str start with str2
+; assumes strlen(str) >= strlen(str2)
+startswith:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push ecx
+
+    mov eax, [ebp+8] ; str2
+    mov ebx, [ebp+12] ; str
+    mov dword [ebp+12], 1 ; assume equality
+.nextChar:
+    mov cl, byte [eax]
+    test cl, cl
+    jz .end
+    cmp cl, byte [ebx]
+    jnz .fail
+    inc ebx
+    inc eax
+    jmp .nextChar
+.fail:
+    mov dword [ebp+12], 0
+.end:
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 4
+
+; locates a substring
+strstr:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push edx
+
+    mov eax, [ebp+8] ; substr
+    mov ebx, [ebp+12] ; str
+    mov dword [ebp+12], 0 ; return null as default case (not found)
+    mov cl, byte [eax]
+.byteLoop:
+    test cl, cl
+    jz .end ; exit on null terminator
+    cmp cl, byte [ebx]
+    jz .possibleMatch
+
+    inc ebx
+.possibleMatch:
+    push ebx
+    push eax
+    call startswith
+    pop edx
+
+    inc ebx
+    test edx, edx
+    jz .byteLoop
+    dec ebx
+    mov dword [ebp+12], ebx ; return ptr of start of substr
+.end:
+    pop edx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 4

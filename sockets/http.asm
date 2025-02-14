@@ -139,6 +139,10 @@ requestStruct:
     loop .copyData
 
 .end:
+    push dword [ebp+12] ; struct
+    push dword [ebp+8] ; request content
+    call parseHeaders
+
     pop ecx
     pop eax
     pop edi
@@ -219,6 +223,110 @@ getMethodType:
     pop eax
     pop ebp
     ret
+
+STR_WEBSOCKET_UPGRADE: db "Upgrade: websocket", 0
+parseHeaders:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push ecx
+    push edi
+
+    mov ebx, [ebp+12] ; buffer
+.nextHeader:
+    mov edx, dword [DATA_START] ; \r\n
+    inc ebx
+    cmp word [ebx], dx
+    jnz .nextHeader
+    cmp dword [ebx], edx
+    jz .end
+    inc ebx
+    inc ebx
+    ; at this point ebx points to the start of a new line in the message, and already exited if reached start of data
+
+    push ebx
+    push STR_WEBSOCKET_UPGRADE
+    call startswith
+    pop edx
+    cmp edx, 1
+    jz .sec_websocket_key
+
+    ; ... do all other handling of headers
+
+    jmp .nextHeader
+
+.sec_websocket_key:
+    mov eax, [ebp+8] ; struct pointer
+    mov dword [eax + REQ_RESP_CODE_OFFSET], 101 ; 101 Switching Protocol
+    jmp .nextHeader
+.end:
+    pop edi
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp    
+    ret 8
+
+printHeaders:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push ecx
+    push edi
+
+    mov ebx, [ebp+8] ; buffer
+.nextHeader:
+    mov edx, dword [DATA_START] ; \r\n
+    inc ebx
+    cmp word [ebx], dx
+    jnz .nextHeader
+    cmp dword [ebx], edx
+    jz .end
+    inc ebx
+    inc ebx
+
+    push ANSI_RED
+    call setDefaultColor
+    push ebx
+    push dword ':'
+    call printUntil
+    push dword ' '
+    push dword ':'
+    call printChar
+    call printChar
+    call resetDefaultColor
+
+
+    sub esp, 2
+    mov edi, esp
+    mov byte [edi], ':'
+    mov byte [edi+1], 0
+
+    push ebx
+    push edi
+    call strstr
+    pop edx
+    inc edx
+    inc edx
+
+    add esp, 2
+
+    push edx
+    push dword 0xD
+    call printUntil
+    call printTerminator
+
+    jmp .nextHeader
+
+.end:
+    pop edi
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 4
 
 str_log: db "Analisys of new packet:", 10, 0
 str_method: db "Method: ", 0

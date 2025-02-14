@@ -85,6 +85,40 @@ printMessage: ;(offset msg)
 	pop ebp
 	ret 4
 
+printUntil:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    mov eax, [ebp+12] ; message pointer
+    mov edx, [ebp+8] ; end character
+
+    mov ebx, [ebp+12]
+	mov eax, ebx
+.nextChar:
+	cmp byte [eax], dl
+	jz .finished
+	inc eax
+	jmp .nextChar
+.finished:
+	sub eax, ebx
+	
+    mov ecx, [ebp+12] ; first given argument
+	mov edx, eax
+	mov ebx, 1		; write to STDOUT
+	mov eax, 4		; invokes SYS_WRITE (kernel opcode 4)
+	int 80h
+
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 8
+
 printTerminator:
 	push 0Ah
 	call printChar
