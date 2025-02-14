@@ -30,6 +30,21 @@
                 "description": "prints given integer value in decimal format",
                 "params": ["[#] a 32 bit value"],
                 "return": []
+            },
+            "setDefaultColor": {
+                "description": "sets stdout default color to given one",
+                "params": ["[&] ANSI Color pointer"],
+                "return": []
+            },
+            "resetDefaultColor": {
+                "description": "resets stdout to default color",
+                "params": [],
+                "return": []
+            },
+            "printColored": {
+                "description": "in given color, prints given C like string string to stdout encoded as ASCII (NULL terminated)",
+                "params": ["[&] ANSI Color pointer", "[&] buffer pointer"],
+                "return": []
             }
         },
         "general.asm": {

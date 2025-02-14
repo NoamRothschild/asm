@@ -1,3 +1,41 @@
+section .data
+    ANSI_ESC equ 27
+    ANSI_BLACK    db ANSI_ESC, '[30m', 0  ; Black
+    ANSI_RED      db ANSI_ESC, '[31m', 0  ; Red
+    ANSI_GREEN    db ANSI_ESC, '[32m', 0  ; Green
+    ANSI_YELLOW   db ANSI_ESC, '[33m', 0  ; Yellow
+    ANSI_BLUE     db ANSI_ESC, '[34m', 0  ; Blue
+    ANSI_MAGENTA  db ANSI_ESC, '[35m', 0  ; Magenta
+    ANSI_CYAN     db ANSI_ESC, '[36m', 0  ; Cyan
+    ANSI_WHITE    db ANSI_ESC, '[37m', 0  ; White
+    ANSI_RESET    db ANSI_ESC, '[0m', 0   ; Reset to default color
+
+section .text
+
+setDefaultColor:
+    push dword [esp+4] ; ansi_color
+    call printMessage
+    ret 4
+resetDefaultColor:
+    push ANSI_RESET
+    call printMessage
+    ret
+
+;ansi_color, msg
+printColored:
+    push ebp
+    mov ebp, esp
+
+    push dword [ebp+12] ; color
+    call printMessage
+    push dword [ebp+8] ; msg
+    call printMessage
+    push ANSI_RESET
+    call printMessage
+
+    pop ebp
+    ret 8
+
 printChar:
 	push ebp
     mov ebp, esp
