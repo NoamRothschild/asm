@@ -93,6 +93,7 @@ sprintf:
     jmp .copyChar
 
 .end:
+    mov [ebp+8], ebx ; return end of buffer pointer
     pop ecx
     pop ebx
     pop eax

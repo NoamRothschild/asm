@@ -100,11 +100,11 @@
             "sprintf": {
                 "description": "stores formatted print (%s) in given buffer. replaces each '%' with next param",
                 "params": ["[&?] optional string buffer (as many as you want, reverse order)", "[&] string termplate buffer", "[&] dest buffer pointer"],
-                "return": []
+                "return": ["[&] end of dest buffer pointer"]
             },
             "toString": {
                 "description": "takes the given 4 byte value and turn it into a string (base 10)",
-                "params": ["[#] the value to be converted", "[&] buffer pointer"],
+                "params": ["[&] buffer pointer", "[#] the value to be converted"],
                 "return": []
             },
             "strcmp": {

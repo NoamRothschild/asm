@@ -4,7 +4,8 @@
 %include '../common/threading.asm'
 %include '../common/fileManager.asm'
 %include 'sockets.asm'
-%include 'http.asm'
+%include 'http/client_request.asm'
+%include 'http/server_response.asm'
 section .data
     response db 'HTTP/1.1 200 OK', 0Dh, 0Ah, 'Content-Type: text/html', 0Dh, 0Ah, 'Content-Length: 14', 0Dh, 0Ah, 0Dh, 0Ah, 'Hello World!', 0Dh, 0Ah, 0h
 
@@ -67,10 +68,13 @@ _start:
     push request_struct
     call printStruct
 
-    push response
-    call igetLength
+    push request_struct
+    call respond_http
+    pop edx
+
+    push edx ; length of full response in bytes
     push esi
-    push response
+    push response_buffer
     call writeSocket
 
     push esi

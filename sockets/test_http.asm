@@ -3,11 +3,12 @@
 %include '../common/debug.asm'
 %include '../common/threading.asm'
 %include '../common/fileManager.asm'
-%include 'http.asm'
+%include 'http/client_request.asm'
+%include 'http/server_response.asm'
 section .data
-    testcase1 db 'testcase_get.txt', 0
-    testcase2 db 'testcase_post.txt', 0
-    testcase3 db 'testcase_websock.txt', 0
+    testcase1 db 'temporary/testcase_get.txt', 0
+    testcase2 db 'temporary/testcase_post.txt', 0
+    testcase3 db 'temporary/testcase_websock.txt', 0
 
 section .bss
     buffer: resb 4096
@@ -16,6 +17,19 @@ section .bss
 section .text
 
 global _start
+
+printReq:
+    push request_struct
+    call respond_http
+
+    mov ecx, response_buffer
+    pop edx
+    mov ebx, 1		; write to STDOUT
+	mov eax, 4		; invokes SYS_WRITE (kernel opcode 4)
+	int 80h
+    call printTerminator
+    call printTerminator
+    ret
 
 _start:
     push testcase1
@@ -32,6 +46,8 @@ _start:
     call printStruct
 
     call printTerminator
+
+    call printReq
 
     push testcase2
     call iLengthFile
@@ -54,6 +70,8 @@ _start:
     call printStruct
 
     call printTerminator
+
+    call printReq
 
     push testcase2
     call iLengthFile
@@ -76,5 +94,7 @@ _start:
     call printStruct
 
     call printTerminator
+
+    call printReq
 
     call exit
