@@ -3,7 +3,8 @@ section .data
     MAX_READ_BYTES_DISK_FILE equ 4096
     FILE_LENGTH_STR_SIZE equ 6 ; potentially hold up to '99999' (ends with a NULL terminator)
 
-    RESP_TEMPLATE db 'HTTP/1.1 %', 0Dh, 0Ah, 'Content-Type: %', 0Dh, 0Ah, 'Connection: close', 0Dh, 0Ah, 'Content-Length: %', 0Dh, 0Ah, 0Dh, 0Ah, '%', 0Dh, 0Ah, 0
+    ; RESP_TEMPLATE does not include a % for data!!! (to support binary data)
+    RESP_TEMPLATE db 'HTTP/1.1 %', 0Dh, 0Ah, 'Content-Type: %', 0Dh, 0Ah, 'Connection: close', 0Dh, 0Ah, 'Content-Length: %', 0Dh, 0Ah, 0Dh, 0Ah, 0
     TRACEBACK_FILE db 'temporary/index.html', 0 ; file to be displayed when the path provided an invalid file
 
     ; response codes
@@ -90,14 +91,12 @@ respond_http:
     push dword MAX_READ_BYTES_DISK_FILE ; amm of bytes to read
     call readFile
 
-    push esi ; first argument for sprintf
-
     push edi ; file length buffer
     push ecx ; file length
     call toString
 
-    push edi ; second argument for sprintf
-    push eax ; third argument for sprintf
+    push edi ; first argument for sprintf
+    push eax ; second argument for sprintf
     xor eax, eax
     mov ax, word [ebx + REQ_RESP_CODE_OFFSET]
     push eax
@@ -107,7 +106,18 @@ respond_http:
     push response_buffer
     call sprintf
     pop edi ; the pointer to the end of the buffer 
-    add esp, 5*4 ; remove 5 out of 6 pushed args from stack
+    add esp, 4*4 ; remove 4 out of 5 pushed args from stack
+
+    push edi ; start of data pointer
+    push esi ; file contents buffer
+    push ecx ; ammount of bytes to copy (file length)
+    call memcpy
+    pop edi
+
+    mov bh, 0xA
+    mov bl, 0xD ; /r/n
+    mov word [edi], bx
+    add edi, 2
 
     sub edi, response_buffer ; return only the length of the response buffer
 
