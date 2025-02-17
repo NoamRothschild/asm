@@ -225,6 +225,7 @@ getMethodType:
     ret
 
 STR_WEBSOCKET_UPGRADE: db "Upgrade: websocket", 0
+STR_WEBSOCKET_KEY: db "Sec-WebSocket-Key: ", 0
 parseHeaders:
     push ebp
     mov ebp, esp
@@ -246,17 +247,52 @@ parseHeaders:
     ; at this point ebx points to the start of a new line in the message, and already exited if reached start of data
 
     push ebx
-    push STR_WEBSOCKET_UPGRADE
+    push STR_WEBSOCKET_KEY
     call startswith
     pop edx
     cmp edx, 1
     jz .sec_websocket_key
 
+    push ebx
+    push STR_WEBSOCKET_UPGRADE
+    call startswith
+    pop edx
+    cmp edx, 1
+    jz .websocket_exists
+
     ; ... do all other handling of headers
 
     jmp .nextHeader
-
 .sec_websocket_key:
+    push ebx
+
+    mov edx, ebx
+    push STR_WEBSOCKET_KEY
+    call igetLength
+    add edx, [esp]
+    add esp, 4
+
+    mov eax, [ebp+8]
+    add eax, REQ_DATA_OFFSET
+    mov ecx, REQ_DATA_SIZE
+    xor ebx, ebx
+
+.copy_websocket_sec:
+    mov bl, byte [edx]
+
+    cmp bl, 0Dh
+    jz .end_copy_websocket_sec
+
+    mov byte [eax], bl
+    inc eax
+    inc edx
+    loop .copy_websocket_sec
+.end_copy_websocket_sec:
+    mov byte [eax], 0
+
+    pop ebx
+    jmp .nextHeader
+.websocket_exists:
     mov eax, [ebp+8] ; struct pointer
     mov dword [eax + REQ_RESP_CODE_OFFSET], 101 ; 101 Switching Protocol
     jmp .nextHeader

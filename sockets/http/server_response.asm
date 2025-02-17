@@ -5,6 +5,7 @@ section .data
 
     ; RESP_TEMPLATE does not include a % for data!!! (to support binary data)
     RESP_TEMPLATE db 'HTTP/1.1 %', 0Dh, 0Ah, 'Content-Type: %', 0Dh, 0Ah, 'Connection: close', 0Dh, 0Ah, 'Content-Length: %', 0Dh, 0Ah, 0Dh, 0Ah, 0
+    WS_TEMPLATE db 'HTTP/1.1 101 Switching Protocols', 0Dh, 0Ah, 'Upgrade: websocket', 0Dh, 0Ah, 'Connection: Upgrade', 0Dh, 0Ah, 'Sec-WebSocket-Accept: %', 0Dh, 0Ah, 0Dh, 0Ah, 0
     TRACEBACK_FILE db 'temporary/index.html', 0 ; file to be displayed when the path provided an invalid file
 
     ; response codes
@@ -48,10 +49,29 @@ respond_http:
 	push edi
     push esi
 
+    mov ebx, [ebp+8] ; request struct
+    cmp word [ebx + REQ_RESP_CODE_OFFSET], 101
+    jnz .http_req
+.websocket:
+
+    push ebx
+    add dword [esp], REQ_DATA_OFFSET
+    call wsSecAccept
+    push WS_TEMPLATE
+    push response_buffer
+    call sprintf
+    pop edi
+    add esp, 2*4
+    sub edi, response_buffer
+
+    mov [ebp+8], edi
+
+    jmp .end
+
+.http_req:
+
     sub esp, FILE_LENGTH_STR_SIZE
     mov edi, esp
-
-    mov ebx, [ebp+8] ; request struct
 
     mov edx, ebx
     add edx, REQ_PATH_OFFSET

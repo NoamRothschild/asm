@@ -3,6 +3,9 @@
 %include '../common/debug.asm'
 %include '../common/threading.asm'
 %include '../common/fileManager.asm'
+%include '../sha1/sha1.asm'
+%include '../b64/b64.asm'
+%include 'http/websocket.asm'
 %include 'http/client_request.asm'
 %include 'http/server_response.asm'
 section .data
