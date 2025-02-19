@@ -415,3 +415,89 @@ printStruct:
     pop eax
     pop ebp
     ret 4
+
+printReqFormatted:
+    push ebp
+    mov ebp, esp
+    push eax
+    push ebx
+
+    mov eax, [ebp+8] ; req struct
+    push '['
+    call printChar
+    push dword 2 ; UTC+2
+    call unixNow
+    call timeFormatPrint
+    push ' '
+    push ']'
+    call printChar
+    call printChar
+
+    xor ebx, ebx
+    mov bl, byte [eax + REQ_METHOD_OFFSET]
+    cmp bl, METHOD_GET
+    jz .printGET
+    cmp bl, METHOD_POST
+    jz .printPOST
+    cmp bl, METHOD_PUT
+    jz .printPUT
+    cmp bl, METHOD_DELETE
+    jz .printDELETE
+.printGET:
+    push STR_GET
+    call printMessage
+    jmp .printPath
+.printPOST:
+    push STR_POST
+    call printMessage
+    jmp .printPath
+.printPUT:
+    push STR_PUT
+    call printMessage
+    jmp .printPath
+.printDELETE:
+    push STR_DELETE
+    call printMessage
+    jmp .printPath
+.printPath:
+    push ' '
+    call printChar
+
+    mov ebx, eax
+    add ebx, REQ_PATH_OFFSET
+    push ebx
+    call printMessage
+
+    push ' '
+    push '-'
+    push ' '
+    call printChar
+    call printChar
+    call printChar
+
+    xor ebx, ebx
+    mov bx, word [eax + REQ_RESP_CODE_OFFSET]
+    push ebx
+    call printInt
+    call printTerminator
+
+    mov ebx, eax
+    add ebx, REQ_DATA_OFFSET
+    cmp byte [ebx], 0
+    jz .end
+.printData:
+    push ' '
+    push '>'
+    call printChar
+    call printChar
+    
+    push str_data
+    call printMessage
+    push ebx
+    call printMessage
+    call printTerminator
+.end:
+    pop ebx
+    pop eax
+    pop ebp
+    ret 4

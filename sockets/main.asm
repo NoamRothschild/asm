@@ -3,6 +3,7 @@
 %include '../common/debug.asm'
 %include '../common/threading.asm'
 %include '../common/fileManager.asm'
+%include '../common/time.asm'
 %include '../sha1/sha1.asm'
 %include '../b64/b64.asm'
 %include 'sockets.asm'
@@ -69,7 +70,7 @@ _start:
     call requestStruct
 
     push request_struct
-    call printStruct
+    call printReqFormatted
 
     push request_struct
     call respond_http

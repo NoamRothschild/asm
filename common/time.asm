@@ -231,8 +231,7 @@ timeFormatPrint:
     push ebp
     mov ebp, esp
 
-    mov eax, [ebp+8] ; unix timestamp
-    push eax
+    push dword [ebp+8] ; unix timestamp
     call timeYrMoDy
     push dword [esp+8]
     call printInt
@@ -248,7 +247,7 @@ timeFormatPrint:
 
     push ' '
     call printChar
-    push eax
+    push dword [ebp+8] ; unix timestamp
     call timeHrMinSec
     push dword [esp]
     call printInt
@@ -263,4 +262,4 @@ timeFormatPrint:
     add esp, 12
 
     pop ebp
-    ret
+    ret 4
