@@ -1,0 +1,32 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Client</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="connection-area">
+      <label for="wsUrl">WebSocket URL:</label>
+      <input type="text" id="wsUrl" value="ws://localhost:8000">
+      <button id="connectBtn">Connect</button>
+    </div>
+
+    <div class="message-area">
+      <label for="messageText">Message:</label>
+      <input type="text" id="messageText">
+      <button id="sendBtn">Send</button>
+    </div>
+
+    <div class="log-area">
+      <div class="log-title">Logs:</div>
+      <div id="logBox" class="log-box">
+        <!-- Logs will appear here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

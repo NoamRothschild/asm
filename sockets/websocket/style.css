@@ -1,0 +1,65 @@
+body {
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f4f4f4;
+}
+
+.container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  width: 80%;
+  max-width: 600px;
+}
+
+.connection-area, .message-area, .log-area {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="text"] {
+  width: calc(100% - 10px);
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.log-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.log-box {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  height: 150px;
+  overflow-y: scroll;
+  background-color: #f9f9f9;
+  font-family: monospace;
+  font-size: 12px;
+}
