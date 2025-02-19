@@ -1,6 +1,6 @@
 section .data
-    RESP_BUFFER_SIZE equ 16384
-    MAX_READ_BYTES_DISK_FILE equ 4096
+    MAX_READ_BYTES_DISK_FILE equ 65536
+    RESP_BUFFER_SIZE equ MAX_READ_BYTES_DISK_FILE + 4096
     FILE_LENGTH_STR_SIZE equ 6 ; potentially hold up to '99999' (ends with a NULL terminator)
 
     ; RESP_TEMPLATE does not include a % for data!!! (to support binary data)
@@ -35,6 +35,7 @@ section .data
     PNG_TYPE db 'image/png', 0
 section .bss
     response_buffer: resb RESP_BUFFER_SIZE ; this buffer would hold the request sent to the client
+    filedata_buffer: resb MAX_READ_BYTES_DISK_FILE
 
 section .text
 
@@ -47,7 +48,6 @@ respond_http:
 	push ecx
 	push edx
 	push edi
-    push esi
 
     mov ebx, [ebp+8] ; request struct
     cmp word [ebx + REQ_RESP_CODE_OFFSET], 101
@@ -103,11 +103,11 @@ respond_http:
     call openFile
     pop edx ; get the file descriptor of the given file
 
-    sub esp, MAX_READ_BYTES_DISK_FILE
-    mov esi, esp
+    ;//sub esp, MAX_READ_BYTES_DISK_FILE
+    ;//mov esi, esp
 
     push edx ; file descriptor
-    push esi ; file contents buffer
+    push filedata_buffer ; file contents buffer
     push dword MAX_READ_BYTES_DISK_FILE ; amm of bytes to read
     call readFile
 
@@ -129,7 +129,7 @@ respond_http:
     add esp, 4*4 ; remove 4 out of 5 pushed args from stack
 
     push edi ; start of data pointer
-    push esi ; file contents buffer
+    push filedata_buffer ; file contents buffer
     push ecx ; ammount of bytes to copy (file length)
     call memcpy
     pop edi
@@ -143,11 +143,10 @@ respond_http:
 
     mov [ebp+8], edi
 
-    add esp, MAX_READ_BYTES_DISK_FILE
+    ;//add esp, MAX_READ_BYTES_DISK_FILE
     add esp, FILE_LENGTH_STR_SIZE
 .end:
 
-    pop esi
     pop edi
 	pop edx
 	pop ecx
