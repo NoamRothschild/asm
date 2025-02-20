@@ -121,6 +121,11 @@
                 "description": "locates a substring in a string",
                 "params": ["[&] string pointer", "[&] substring pointer"],
                 "return": ["[&] substring start pointer (or NULL if not found)"]
+            },
+            "strcpy": {
+                "description": "copies the given string to the given location",
+                "params": ["[&] dest str buffer pointer", "[&] src str buffer pointer"],
+                "return": ["[&] end of message ptr"]
             }
         },
         "fileManager.asm": {
@@ -163,6 +168,28 @@
                 "description": "returns the length of a file, or -1 on error",
                 "params": ["[&] filename pointer"],
                 "return": ["[#] length of the file (in bytes)"]
+            }
+        },
+        "time.asm": {
+            "unixNow": {
+                "description": "returns the current second in unix timestamp",
+                "params": ["[#] UTC+? - prodive a different timezone (ex: 2 for UTC+2)"],
+                "return": ["[#] Unix timestamp for the executed second"]
+            },
+            "timeYrMoDy": {
+                "description": "returns Year Month & Day given a unix timestamp",
+                "params": ["[#] Unix timestamp"],
+                "return": ["[#] Year", "[#] Month", "[#] Day"]
+            },
+            "timeHrMinSec": {
+                "description": "returns Hour Minute & Second given a unix timestamp",
+                "params": ["[#] Unix timestamp"],
+                "return": ["[#] Hour", "[#] Minute", "[#] Second"]
+            },
+            "timeFormatPrint": {
+                "description": "prints to stdout 'Yr/Mo/Dy Hr:Min:Sec' given a unix timestamp",
+                "params": ["[#] Unix timestamp"],
+                "return": []
             }
         }
     },
@@ -247,7 +274,8 @@
             "return": []
            }
         },
-        "http.asm": {
+        "http/client_request.asm": {
+
             "requestStruct": {
                 "description": "creates a special struct from the parsed HTTP client request",
                 "params": ["[&] HTTP request buffer pointer", "[&] struct pointer (length must be above REQ_TOTAL_SIZE)"],
@@ -272,6 +300,40 @@
                 "description": "returns the const of the const representing it from the string-like representation",
                 "params": ["[&] suspected method pointer"],
                 "return": ["[#] the const representing the method type, or -1 if method not found (for values, lookup: METHOD_GET / METHOD_POST / ...)"]
+            },
+            "printReqFormatted": {
+                "description": "prints a log message for the given request",
+                "params": ["[&] HTTP request buffer pointer"],
+                "return": []
+            }
+        },
+        "http/server_response.asm": {
+            "respond_http": {
+                "description": "takes a client request struct and creates a response_buffer",
+                "params": ["[&] HTTP request buffer pointer"],
+                "return": ["[#] length of full response in bytes"]
+            },
+            "getResonseCodeStr": {
+                "description": "given a status code (number), return its string representation pointer",
+                "params": ["[#] status code"],
+                "return": ["[&] buffer pointer pointing to the str representing given status code (EX: '200 OK')"]
+            },
+            "getMime": {
+                "description": "given a file extension return its mime type",
+                "params": ["[&] file extension pointer (without the '.')"],
+                "return": ["[&] buffer pointer pointing to the str representing the MIME for the given extension"]
+            },
+            "getExtension": {
+                "description": "returns a ptr to the start of the file extension (after the first '.')",
+                "params": ["[&] fileapath pointer"],
+                "return": ["[&] fileextension pointer (original pointer but incremented!!)"]
+            }
+        },
+        "http/websocket": {
+            "wsSecAccept": {
+                "description": "given the sec-websocket-key and a buffer pointer, stores inside buffer the response",
+                "params": ["[&] sec-websocket-key str ptr"],
+                "return": ["[&] pointer to the ws_buffer containing resulted auth result."]
             }
         }
     }

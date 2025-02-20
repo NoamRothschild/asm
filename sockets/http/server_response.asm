@@ -39,7 +39,7 @@ section .bss
 
 section .text
 
-; takes a client request struct and a socket connection descriptor and pushes a response
+; takes a client request struct and creates a response_buffer
 respond_http:
     push ebp
 	mov ebp, esp
