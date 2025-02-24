@@ -7,9 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let websocket = null;
 
-  function logMessage(message) {
+  function logMessage(reqType, message) {
+    const reqClass = 'log-'+reqType.toLowerCase();
     const logEntry = document.createElement('div');
     logEntry.textContent = message;
+    logEntry.classList.add(reqClass);
     logBox.appendChild(logEntry);
     logBox.scrollTop = logBox.scrollHeight; // Auto-scroll to bottom
   }
@@ -24,38 +26,40 @@ document.addEventListener('DOMContentLoaded', () => {
     websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
-      logMessage('Connected to WebSocket server.');
+      logMessage('INFO', 'Connected to WebSocket server.');
       connectBtn.textContent = 'Disconnect';
     };
 
     websocket.onclose = () => {
-      logMessage('Disconnected from WebSocket server.');
+      logMessage('INFO', 'Disconnected from WebSocket server.');
       connectBtn.textContent = 'Connect';
       websocket = null;
     };
 
     websocket.onerror = (error) => {
-      logMessage('WebSocket connection error: ' + error);
+      logMessage('WARN', 'WebSocket connection error: ' + error);
     };
 
     websocket.onmessage = (event) => {
-      const hex = [...event.data]
-        .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
-        .join(' ');
-      logMessage('Received (hex): ' + hex);
-      logMessage('Received: ' + event.data);
+      if (document.getElementById('asHex').checked) {
+        const hex = [...event.data]
+          .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+          .join(' ');
+        logMessage('RECV', 'Received (hex): ' + hex);
+      }
+      logMessage('RECV', 'Received: ' + event.data);
     };
   });
 
   sendBtn.addEventListener('click', () => {
     if (!websocket || websocket.readyState !== WebSocket.OPEN) {
-      logMessage('Not connected to WebSocket server.');
+      logMessage('INFO', 'Not connected to WebSocket server.');
       return;
     }
 
     const message = messageInput.value;
     websocket.send(message);
-    logMessage('Sent: ' + message);
+    logMessage('SENT', 'Sent: ' + message);
     messageInput.value = ''; // Clear input after sending
   });
 });

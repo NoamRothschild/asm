@@ -3,7 +3,7 @@ section .data
     WS_PAYLOAD_OFFSET equ 1 ;
     WS_MASK_KEY_SIZE equ 4 ; mask key is granteed to be 4 bytes in length
 
-    WS_MAX_VALUE_UNSIGNED_16BIT equ 65536
+    WS_MAX_VALUE_UNSIGNED_16BIT equ 65535
     ws_magic_string db "258EAFA5-E914-47DA-95CA-C5AB0DC85B11", 0
     WS_MAGIC_STRING_LEN equ $ - ws_magic_string - 1
 section .bss
@@ -99,13 +99,7 @@ makeResponse:
     jmp .largest_msg_len
 
 .smallest_msg_len:
-    push dword ws_resp_buff
-    push dword 0x0
-    push dword 512
-    call memset
-
     mov bh, cl
-    ;//and bh, 0b01111111
     mov word [ws_resp_buff], bx
 
     push dword ws_resp_buff+2
@@ -120,6 +114,25 @@ makeResponse:
     mov dword [ws_tmp_len], ecx
     jmp .end
 .medium_msg_len:
+    mov bh, 126
+    mov word [ws_resp_buff], bx
+
+    mov bx, cx
+    xchg bl, bh ; length prepeared to be stored in big endian on memory
+    mov word [ws_resp_buff+2], bx
+
+    push dword ws_resp_buff+4
+    push dword [ebp+8] ; message
+    push ecx
+    call memcpy
+    add esp, 4
+
+    add dword [ebp+12], 4
+    
+    mov ecx, [ebp+12]
+    mov dword [ws_tmp_len], ecx
+    jmp .end
+
 .largest_msg_len:
     mov ecx, [ws_tmp_len]
     mov dword [ebp+12], ecx
@@ -190,11 +203,11 @@ parseRequest:
     xor edx, edx
     mov bl, byte [ws_headers+WS_PAYLOAD_OFFSET]
     and bl, 0b01111111 ; removing the mask indicator bit from payload len byte
-    call printTerminator
-    call printTerminator
-    push ebx
-    call printInt
-    call printTerminator
+    ;//call printTerminator
+    ;//call printTerminator
+    ;//push ebx
+    ;//call printInt
+    ;//call printTerminator
     cmp bl, 126
     jb .smallest_msg_len
     cmp bl, 126
@@ -239,10 +252,10 @@ parseRequest:
     jmp .unmask
 
 .unmask:
-    push edi
-    push edx
-    call printInt
-    call printInt
+    ;//push edi
+    ;//push edx
+    ;//call printInt
+    ;//call printInt
 
     push dword ws_req_data
     push dword 0x0

@@ -63,3 +63,16 @@ button:hover {
   font-family: monospace;
   font-size: 12px;
 }
+
+.log-warn {
+  color: #8b0000;
+}
+.log-info {
+  color:#D59153;
+}
+.log-recv {
+  color: #5CAC78;
+}
+.log-sent {
+  color: #4A9CB3;
+}

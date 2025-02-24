@@ -87,14 +87,6 @@ _start:
     
     push esi
     call parseRequest
-    push dword [esp]
-    push dword [esp] ; length, length, length
-    call printTerminator
-    call printTerminator
-    call printInt
-    call printTerminator
-    push ws_resp_buff
-    call printHex ; length, //length, //length, buff
     push esi
     push ws_resp_buff
     call writeSocket
