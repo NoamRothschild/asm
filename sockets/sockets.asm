@@ -115,8 +115,10 @@ acceptSocket:
 readSocket:
 	push ebp
 	mov ebp, esp
-    push ecx
     push eax
+	push ebx
+    push ecx
+	push edx
 
 	mov edx, [ebp+16] ; amm of bytes to read
 	mov ecx, [ebp+8] ; buffer*
@@ -124,8 +126,10 @@ readSocket:
 	mov eax, 3 ; invokes SYS_READ (kernel opcode 3)
 	int 80h
 
-    pop eax
-    pop ecx
+    pop edx
+	pop ecx
+	pop ebx
+	pop eax
 	pop ebp
 	ret 12
 

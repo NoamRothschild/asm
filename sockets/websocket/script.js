@@ -39,6 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     websocket.onmessage = (event) => {
+      const hex = [...event.data]
+        .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join(' ');
+      logMessage('Received (hex): ' + hex);
       logMessage('Received: ' + event.data);
     };
   });

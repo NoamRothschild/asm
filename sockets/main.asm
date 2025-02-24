@@ -81,6 +81,26 @@ _start:
     push response_buffer
     call writeSocket
 
+    cmp word [request_struct + REQ_RESP_CODE_OFFSET], 101
+    jnz .closeSocket
+.websocket:
+    
+    push esi
+    call parseRequest
+    push dword [esp]
+    push dword [esp] ; length, length, length
+    call printTerminator
+    call printTerminator
+    call printInt
+    call printTerminator
+    push ws_resp_buff
+    call printHex ; length, //length, //length, buff
+    push esi
+    push ws_resp_buff
+    call writeSocket
+    jmp .websocket
+
+.closeSocket:
     push esi
     call closeSocket
 
