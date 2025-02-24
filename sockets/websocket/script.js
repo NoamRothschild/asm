@@ -16,6 +16,18 @@ document.addEventListener('DOMContentLoaded', () => {
     logBox.scrollTop = logBox.scrollHeight; // Auto-scroll to bottom
   }
 
+  function sendMessage() {
+    if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+      logMessage('INFO', 'Not connected to WebSocket server.');
+      return;
+    }
+
+    const message = messageInput.value;
+    websocket.send(message);
+    logMessage('SENT', 'Sent: ' + message);
+    messageInput.value = ''; // Clear input after sending
+  }
+
   connectBtn.addEventListener('click', () => {
     const wsUrl = wsUrlInput.value;
 
@@ -51,15 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   });
 
-  sendBtn.addEventListener('click', () => {
-    if (!websocket || websocket.readyState !== WebSocket.OPEN) {
-      logMessage('INFO', 'Not connected to WebSocket server.');
-      return;
-    }
+  sendBtn.addEventListener('click', sendMessage);
 
-    const message = messageInput.value;
-    websocket.send(message);
-    logMessage('SENT', 'Sent: ' + message);
-    messageInput.value = ''; // Clear input after sending
+  messageInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+      sendMessage();
+      event.preventDefault();
+    }
   });
 });
