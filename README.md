@@ -2,7 +2,13 @@
 
 all of my assembler scripts
 
-Scripts are built for x86-64 architecture and can be ran natively on Ubuntu or WSL.
+Scripts are built for x86-64 architecture and can be ran natively on any linux distro.
+
+| Status | Working |
+|----------|-------|
+| WSL | ✅ |
+| Ubuntu | ✅ |
+| Hyprland | ✅ |
 
 ### Documentation
 
