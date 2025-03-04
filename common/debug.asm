@@ -1,3 +1,5 @@
+%ifndef DEBUG_INCLUDE
+%define DEBUG_INCLUDE
 section .data
     ANSI_ESC equ 27
     ANSI_BLACK    db ANSI_ESC, '[30m', 0  ; Black
@@ -247,3 +249,4 @@ printInt:
     pop eax
     pop ebp
     ret 4
+%endif

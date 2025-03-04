@@ -1,3 +1,5 @@
+%ifndef B64_INCLUDE
+%define B64_INCLUDE
 section .text
 
 b64_index_table: db 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
@@ -111,3 +113,4 @@ b64_encode:
     inc edi
     loop .placeEqualSign
     jmp .end
+%endif

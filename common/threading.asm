@@ -1,3 +1,5 @@
+%ifndef THREADING_INCLUDE
+%define THREADING_INCLUDE
 ; when resulting in 0, executor is child process, else parent.
 fork:
     push dword [esp]
@@ -32,3 +34,5 @@ close_terminated:
     pop eax
     ret
 
+
+%endif

@@ -1,3 +1,5 @@
+%ifndef SOCKETS_INCLUDE
+%define SOCKETS_INCLUDE
 ; returns the file descriptor for the created socket
 createSocket:
     push dword [esp]
@@ -164,3 +166,4 @@ closeSocket:
     pop eax
 	pop ebp
 	ret 4
+%endif

@@ -1,3 +1,5 @@
+%ifndef FILEMANAGER_INCLUDE
+%define FILEMANAGER_INCLUDE
 
 newFile:
 	push ebp
@@ -183,3 +185,4 @@ iLengthFile:
 	pop eax
 	pop ebp
 	ret
+%endif

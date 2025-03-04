@@ -1,3 +1,7 @@
+%ifndef SHA1_INCLUDE
+%define SHA1_INCLUDE
+%include '../common/general.asm'
+%include '../common/debug.asm'
 section .data
     SHA1_CHUNK_SIZE_BYTES equ 64
     SHA1_CHUNK_SIZE_BITS  equ SHA1_CHUNK_SIZE_BYTES * 8
@@ -487,3 +491,4 @@ sha1:
     pop eax
     pop ebp
     ret 12
+%endif

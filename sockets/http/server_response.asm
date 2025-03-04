@@ -1,3 +1,7 @@
+%ifndef SERVER_RESPONSE_INCLUDE
+%define SERVER_RESPONSE_INCLUDE
+%include '../common/string.asm'
+%include '../common/fileManager.asm'
 section .data
     MAX_READ_BYTES_DISK_FILE equ 65536
     RESP_BUFFER_SIZE equ MAX_READ_BYTES_DISK_FILE + 4096
@@ -285,3 +289,4 @@ getExtension:
     pop ebx
     pop ebp
     ret
+%endif

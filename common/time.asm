@@ -1,3 +1,5 @@
+%ifndef TIME_INCLUDE
+%define TIME_INCLUDE
 section .data
     SECONDS_IN_DAY equ 86400
     DAYS_IN_4_YEARS equ 3*365+366
@@ -263,3 +265,4 @@ timeFormatPrint:
 
     pop ebp
     ret 4
+%endif

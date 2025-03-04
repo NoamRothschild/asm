@@ -1,15 +1,9 @@
 %include '../common/general.asm'
-%include '../common/string.asm'
 %include '../common/debug.asm'
 %include '../common/threading.asm'
-%include '../common/fileManager.asm'
-%include '../common/time.asm'
-%include '../sha1/sha1.asm'
-%include '../b64/b64.asm'
 %include 'sockets.asm'
+%include 'http/http.asm'
 %include 'http/websocket.asm'
-%include 'http/client_request.asm'
-%include 'http/server_response.asm'
 section .data
     response db 'HTTP/1.1 200 OK', 0Dh, 0Ah, 'Content-Type: text/html', 0Dh, 0Ah, 'Content-Length: 14', 0Dh, 0Ah, 0Dh, 0Ah, 'Hello World!', 0Dh, 0Ah, 0h
 

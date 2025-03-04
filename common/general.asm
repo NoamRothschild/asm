@@ -1,3 +1,5 @@
+%ifndef GENERAL_INCLUDE
+%define GENERAL_INCLUDE
 igetLength:
 	push ebp
 	mov ebp, esp
@@ -137,3 +139,5 @@ exit:
 	mov eax, 1 ; invokes SYS_EXIT (kernel opcode 1)
 	int 80h
     ret
+
+%endif

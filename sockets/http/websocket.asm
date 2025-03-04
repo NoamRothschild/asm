@@ -1,3 +1,10 @@
+%ifndef WEBSOCKET_INCLUDE
+%define WEBSOCKET_INCLUDE
+%include '../sha1/sha1.asm'
+%include '../b64/b64.asm'
+%include '../common/general.asm'
+%include '../common/debug.asm'
+%include 'sockets.asm'
 section .data
     WS_HEADERS_SIZE equ 10 ; maximum length the headers can take (not including mask key)
     WS_PAYLOAD_OFFSET equ 1 ;
@@ -299,3 +306,4 @@ parseRequest:
     pop ebx
     pop ebp
     ret
+%endif

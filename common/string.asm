@@ -1,3 +1,5 @@
+%ifndef STRING_INCLUDE
+%define STRING_INCLUDE
 strlen:
     push ebp
 	mov ebp, esp
@@ -244,3 +246,4 @@ strstr:
     pop eax
     pop ebp
     ret 4
+%endif

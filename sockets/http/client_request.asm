@@ -1,3 +1,7 @@
+%ifndef CLIENT_REQUEST_INCLUDE
+%define CLIENT_REQUEST_INCLUDE
+%include '../common/time.asm'
+%include '../common/string.asm'
 section .data
     REQ_METHOD_OFFSET equ 0
     REQ_METHOD_SIZE equ 1 ; 1 byte in length 
@@ -501,3 +505,4 @@ printReqFormatted:
     pop eax
     pop ebp
     ret 4
+%endif
