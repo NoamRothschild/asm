@@ -21,7 +21,7 @@ igetLength:
 	pop ebp
 	ret
 
-; memcpy(dest*, src*, byte_length) 
+; memcpy(dest*, src*, byteLength) 
 ; returns end of message ptr
 memcpy:
     push ebp
@@ -50,7 +50,7 @@ memcpy:
     pop ebp
     ret 8
 
-; memset(dest*, byte, byte_length)
+; memset(dest*, byte, byteLength)
 ; sets all data in given range to given byte
 memset:
     push ebp

@@ -75,7 +75,7 @@ openFile:
 	ret
 
 ; stores file contents given a file descriptor, location to store in and number of bytes
-readFile: ; (unsigned int fd, char *buf, size_t count)
+readFile: ; (unsigned int fd, char *buf, sizeT count)
 	push ebp
 	mov ebp, esp
 	push eax

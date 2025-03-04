@@ -6,7 +6,7 @@ section .data
     DAYS_IN_100_YEARS equ 76*365 + 24*366
     DAYS_IN_400_YEARS equ 303*365 + 97*366
 
-    days_in_months db 31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    daysInMonths db 31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 
 section .text
 
@@ -116,7 +116,7 @@ timeYrMoDy:
     sete cl
     add ecx, 365
     cmp ecx, edi
-    ja .end_remainingYears
+    ja .endRemainingYears
 
     sub edi, ecx
     inc dword [ebp+8]
@@ -124,7 +124,7 @@ timeYrMoDy:
     pop ecx
     loop .remainingYears
     push ecx
-.end_remainingYears:
+.endRemainingYears:
     pop ecx
 
     ; account for extra day in month for leap year
@@ -154,20 +154,20 @@ timeYrMoDy:
     sete cl
     or ecx, dword [esp]
     add esp, 4 ; deallocate from stack
-    add ecx, 28 ; 29 if is_leap else 28
-    mov byte [days_in_months+1], cl
+    add ecx, 28 ; 29 if isLeap else 28
+    mov byte [daysInMonths+1], cl
 
     mov dword [ebp+12], 1
     xor ecx, ecx
 .computeMonthDay:
     push ecx
 
-    add ecx, days_in_months
+    add ecx, daysInMonths
     xor eax, eax
     mov al, byte [ecx] ; days in month
 
     cmp eax, edi
-    ja .end_computeMonthDay
+    ja .endComputeMonthDay
     sub edi, eax
     inc dword [ebp+12]
 
@@ -176,7 +176,7 @@ timeYrMoDy:
     cmp ecx, 12
     jnz .computeMonthDay
     push ecx
-.end_computeMonthDay:
+.endComputeMonthDay:
     pop ecx
     inc edi
 

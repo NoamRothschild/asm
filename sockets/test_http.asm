@@ -16,17 +16,17 @@ section .data
 
 section .bss
     buffer: resb 4096
-    request_struct: resb REQ_TOTAL_SIZE
+    requestStruct: resb REQ_TOTAL_SIZE
 
 section .text
 
 global _start
 
 printReq:
-    push request_struct
-    call respond_http
+    push requestStruct
+    call respondHttp
 
-    mov ecx, response_buffer
+    mov ecx, responseBuffer
     pop edx
     mov ebx, 1		; write to STDOUT
 	mov eax, 4		; invokes SYS_WRITE (kernel opcode 4)
@@ -43,10 +43,10 @@ _start:
     call readFile
 
     push buffer
-    push request_struct
-    call requestStruct
+    push requestStruct
+    call generateRequestStruct
 
-    push request_struct
+    push requestStruct
     call printReqFormatted
 
     call printTerminator
@@ -67,10 +67,10 @@ _start:
     call readFile
 
     push buffer
-    push request_struct
-    call requestStruct
+    push requestStruct
+    call generateRequestStruct
 
-    push request_struct
+    push requestStruct
     call printReqFormatted
 
     call printTerminator
@@ -91,10 +91,10 @@ _start:
     call readFile
 
     push buffer
-    push request_struct
-    call requestStruct
+    push requestStruct
+    call generateRequestStruct
 
-    push request_struct
+    push requestStruct
     call printReqFormatted
 
     call printTerminator

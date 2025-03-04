@@ -38,13 +38,13 @@ section .data
     ICO_TYPE db 'image/x-icon', 0
     PNG_TYPE db 'image/png', 0
 section .bss
-    response_buffer: resb RESP_BUFFER_SIZE ; this buffer would hold the request sent to the client
-    filedata_buffer: resb MAX_READ_BYTES_DISK_FILE
+    responseBuffer: resb RESP_BUFFER_SIZE ; this buffer would hold the request sent to the client
+    filedataBuffer: resb MAX_READ_BYTES_DISK_FILE
 
 section .text
 
-; takes a client request struct and creates a response_buffer
-respond_http:
+; takes a client request struct and creates a responseBuffer
+respondHttp:
     push ebp
 	mov ebp, esp
 	push eax
@@ -55,24 +55,24 @@ respond_http:
 
     mov ebx, [ebp+8] ; request struct
     cmp word [ebx + REQ_RESP_CODE_OFFSET], 101
-    jnz .http_req
+    jnz .httpReq
 .websocket:
 
     push ebx
     add dword [esp], REQ_DATA_OFFSET
     call wsSecAccept
     push WS_TEMPLATE
-    push response_buffer
+    push responseBuffer
     call sprintf
     pop edi
     add esp, 2*4
-    sub edi, response_buffer
+    sub edi, responseBuffer
 
     mov [ebp+8], edi
 
     jmp .end
 
-.http_req:
+.httpReq:
 
     sub esp, FILE_LENGTH_STR_SIZE
     mov edi, esp
@@ -111,7 +111,7 @@ respond_http:
     ;//mov esi, esp
 
     push edx ; file descriptor
-    push filedata_buffer ; file contents buffer
+    push filedataBuffer ; file contents buffer
     push dword MAX_READ_BYTES_DISK_FILE ; amm of bytes to read
     call readFile
 
@@ -127,13 +127,13 @@ respond_http:
     call getResonseCodeStr
 
     push RESP_TEMPLATE
-    push response_buffer
+    push responseBuffer
     call sprintf
     pop edi ; the pointer to the end of the buffer 
     add esp, 4*4 ; remove 4 out of 5 pushed args from stack
 
     push edi ; start of data pointer
-    push filedata_buffer ; file contents buffer
+    push filedataBuffer ; file contents buffer
     push ecx ; ammount of bytes to copy (file length)
     call memcpy
     pop edi
@@ -143,7 +143,7 @@ respond_http:
     mov word [edi], bx
     add edi, 2
 
-    sub edi, response_buffer ; return only the length of the response buffer
+    sub edi, responseBuffer ; return only the length of the response buffer
 
     mov [ebp+8], edi
 
@@ -187,7 +187,7 @@ getResonseCodeStr:
     mov dword [esp+4], STR_CODE_501
     ret
 
-; getMime(fname_extension*) -> content-type
+; getMime(fnameExtension*) -> content-type
 getMime:
     push ebp
     mov ebp, esp

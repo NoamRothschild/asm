@@ -85,7 +85,7 @@
                 "params": [],
                 "return": ["[#] process type identifer (when 0 executor is child process, else parent)"]
             },
-            "close_terminated": {
+            "closeTerminated": {
                 "description": "closes terminated child processes since just calling exit is not enough",
                 "params": [],
                 "return": []
@@ -195,7 +195,7 @@
     },
     "b64/": {
         "b64.asm": {
-            "b64_encode": {
+            "b64Encode": {
                 "description": "encodes the given bytearray & stores into buffer",
                 "params": ["[#] length of message", "[&] dest buffer pointer", "[&] src buffer pointer"],
                 "return": []
@@ -214,12 +214,12 @@
                 "params": ["[#] length of message (in bytes)"],
                 "return": []
             },
-            "function_f": {
+            "functionF": {
                 "description": "internal sha1 function that calculates f(t;B,C,D)",
                 "params": ["[#] t", "[#] B", "[#] C", "[#] D"],
                 "return": ["[#] calculated value"]
             },
-            "constants_k": {
+            "constantsK": {
                 "description": "internal sha1 function that returns K(t) const based on t",
                 "params": ["[#] t"],
                 "return": ["[#] calculated const value"]
@@ -229,7 +229,7 @@
                 "params": ["[&] 20 byte buffer pointer"],
                 "return": []
             },
-            "sha1_reset_h": {
+            "sha1ResetH": {
                 "description": "resets the h's values to the default ones",
                 "params": ["[&] 20 byte dest buffer pointer"],
                 "return": []
@@ -308,8 +308,8 @@
             }
         },
         "http/server_response.asm": {
-            "respond_http": {
-                "description": "takes a client request struct and creates a response_buffer",
+            "respondHttp": {
+                "description": "takes a client request struct and creates a response buffer",
                 "params": ["[&] HTTP request buffer pointer"],
                 "return": ["[#] length of full response in bytes"]
             },

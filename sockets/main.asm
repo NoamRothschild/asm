@@ -10,14 +10,14 @@ section .data
 section .bss
     buffer: resb 4096
     _tmp: resb 1 ; here only for easier printing since I rely on null terminators
-    request_struct: resb REQ_TOTAL_SIZE
+    requestStruct: resb REQ_TOTAL_SIZE
     _tmp2: resb 1 ; here only for easier printing since I rely on null terminators
 
 section .text
 global _start
 
-started_str: db "Server binded up successfully to http://localhost:8000", 10, 0
-client_connect_str: db "A new client has connected!, data:", 10, 0
+startedStr: db "Server binded up successfully to http://localhost:8000", 10, 0
+clientConnectStr: db "A new client has connected!, data:", 10, 0
 
 _start:
     xor eax, eax
@@ -31,7 +31,7 @@ _start:
     push edi
     call listenSocket
     
-    push started_str
+    push startedStr
     call printMessage
 
     .parent:
@@ -39,7 +39,7 @@ _start:
     call acceptSocket ; waits here for a message to be sent
     pop esi
 
-    call close_terminated
+    call closeTerminated
     call fork
     pop eax
     cmp eax, 0 ; when resulting in 0, executor is child process, else parent.
@@ -47,7 +47,7 @@ _start:
 	jmp .parent
 
     .child:
-    push client_connect_str
+    push clientConnectStr
     call printMessage
 
     push dword 4096
@@ -60,29 +60,29 @@ _start:
     call printColored
     
     push buffer
-    push request_struct
-    call requestStruct
+    push requestStruct
+    call generateRequestStruct
 
-    push request_struct
+    push requestStruct
     call printReqFormatted
 
-    push request_struct
-    call respond_http
+    push requestStruct
+    call respondHttp
     pop edx
 
     push edx ; length of full response in bytes
     push esi
-    push response_buffer
+    push responseBuffer
     call writeSocket
 
-    cmp word [request_struct + REQ_RESP_CODE_OFFSET], 101
+    cmp word [requestStruct + REQ_RESP_CODE_OFFSET], 101
     jnz .closeSocket
 .websocket:
     
     push esi
     call parseRequest
     push esi
-    push ws_resp_buff
+    push wsRespBuff
     call writeSocket
     jmp .websocket
 

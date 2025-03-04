@@ -4,7 +4,7 @@
 
 section .data
     msg db 'encode me!', 0
-    msg_len db 10
+    msgLen db 10
 
 section .bss
     ; output buffer must be equal or above the (original length)*4/3
@@ -16,10 +16,10 @@ global _start
 
 _start:
 
-    push dword [msg_len]
+    push dword [msgLen]
     push output
     push msg
-    call b64_encode
+    call b64Encode
     
     push output
     call printMessage

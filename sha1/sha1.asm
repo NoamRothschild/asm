@@ -22,15 +22,15 @@ section .data
     SHA1_H3_DEFAULT equ 0x10325476
     SHA1_H4_DEFAULT equ 0xC3D2E1F0
     
-    sha1_h0 dd SHA1_H0_DEFAULT
-    sha1_h1 dd SHA1_H1_DEFAULT
-    sha1_h2 dd SHA1_H2_DEFAULT
-    sha1_h3 dd SHA1_H3_DEFAULT
-    sha1_h4 dd SHA1_H4_DEFAULT
+    sha1H0 dd SHA1_H0_DEFAULT
+    sha1H1 dd SHA1_H1_DEFAULT
+    sha1H2 dd SHA1_H2_DEFAULT
+    sha1H3 dd SHA1_H3_DEFAULT
+    sha1H4 dd SHA1_H4_DEFAULT
 
 section .bss
     chunk: resb SHA1_CHUNK_SIZE_BYTES ; reserve 512 bits
-    w_buff: resb SHA1_W_BUFF_BYTES
+    wBuff: resb SHA1_W_BUFF_BYTES
 
 section .text
 
@@ -91,8 +91,8 @@ addLen:
 
 ; f(t;B,C,D)
 ; psh t, b, c, d; call f
-function_f_invalid: db "Invalid value passed for t in f(t;B,C,D): 0x", 0
-function_f:
+functionFInvalid: db "Invalid value passed for t in f(t;B,C,D): 0x", 0
+functionF:
     push ebp
     mov ebp, esp
     push eax
@@ -106,7 +106,7 @@ function_f:
 
     mov eax, [ebp+20] ; t
     cmp eax, 0
-    jl .out_bounds
+    jl .outBounds
     cmp eax, 20
     jl .case1
     cmp eax, 40
@@ -115,7 +115,7 @@ function_f:
     jl .case3
     cmp eax, 80
     jl .case2 ; case 4 & 2 are the same
-    jmp .out_bounds
+    jmp .outBounds
 
 .case1:
     mov esi, [ebp+16] ; B
@@ -153,8 +153,8 @@ function_f:
     or ebx, esi ; OR (C AND D)
     mov [ebp+20], ebx
     jmp .end
-.out_bounds:
-    push dword function_f_invalid
+.outBounds:
+    push dword functionFInvalid
     call printMessage
     sub esp, 4
     mov edi, esp
@@ -176,8 +176,8 @@ function_f:
     ret 12
 
 
-function_k_invalid: db "Invalid value passed for k in constants map: 0x", 0
-constants_k:
+functionKInvalid: db "Invalid value passed for k in constants map: 0x", 0
+constantsK:
     push ebp
     mov ebp, esp
     push eax
@@ -185,7 +185,7 @@ constants_k:
 
     mov eax, [ebp+8] ; k
     cmp eax, 0
-    jl .out_bounds
+    jl .outBounds
     cmp eax, 20
     jl .case1
     cmp eax, 40
@@ -194,7 +194,7 @@ constants_k:
     jl .case3
     cmp eax, 80
     jl .case4
-    jmp .out_bounds
+    jmp .outBounds
 
 .case1:
     mov dword [ebp+8], SHA1_K_CONST1
@@ -208,8 +208,8 @@ constants_k:
 .case4:
     mov dword [ebp+8], SHA1_K_CONST4
     jmp .end
-.out_bounds:
-    push dword function_k_invalid
+.outBounds:
+    push dword functionKInvalid
     call printMessage
     sub esp, 4
     mov edi, esp
@@ -236,24 +236,24 @@ digest:
     push ebx
     push eax
 
-    push dword w_buff
+    push dword wBuff
     push dword 0x0
     push dword SHA1_W_BUFF_BYTES
     call memset
 
-    push dword w_buff
+    push dword wBuff
     push dword chunk
     push SHA1_CHUNK_SIZE_BYTES
     call memcpy
     add esp, 4
 
     mov ecx, 16 
-.extend_buff: ; Extending 16bit buff to 80 bits. see SHA-1 RFC section 6.1-b
+.extendBuff: ; Extending 16bit buff to 80 bits. see SHA-1 RFC section 6.1-b
 
     mov ebx, ecx
     sub ebx, 3
     shl ebx, 2
-    add ebx, w_buff
+    add ebx, wBuff
     mov ebx, [ebx]
     bswap ebx
     mov esi, ebx ; W(t-3)
@@ -261,7 +261,7 @@ digest:
     mov ebx, ecx
     sub ebx, 8
     shl ebx, 2
-    add ebx, w_buff
+    add ebx, wBuff
     mov ebx, [ebx]
     bswap ebx
     xor esi, ebx ; W(t-8)
@@ -269,7 +269,7 @@ digest:
     mov ebx, ecx
     sub ebx, 14
     shl ebx, 2
-    add ebx, w_buff
+    add ebx, wBuff
     mov ebx, [ebx]
     bswap ebx
     xor esi, ebx ; W(t-14)
@@ -277,7 +277,7 @@ digest:
     mov ebx, ecx
     sub ebx, 16
     shl ebx, 2
-    add ebx, w_buff
+    add ebx, wBuff
     mov ebx, [ebx]
     bswap ebx
     xor esi, ebx ; W(t-16)
@@ -286,12 +286,12 @@ digest:
 
     mov ebx, ecx
     shl ebx, 2
-    add ebx, w_buff
+    add ebx, wBuff
     mov [ebx], esi
 
     inc ecx
     cmp ecx, 80
-    jl .extend_buff
+    jl .extendBuff
     sub esp, 4*6 ; reserving space for 6 dwords
     mov edi, esp
     ; edi+0  - A
@@ -301,19 +301,19 @@ digest:
     ; edi+16 - E
     ; edi+20 - TEMP
 
-    mov esi, [sha1_h0]
+    mov esi, [sha1H0]
     mov dword [edi+0 ], esi
-    mov esi, [sha1_h1]
+    mov esi, [sha1H1]
     mov dword [edi+4 ], esi
-    mov esi, [sha1_h2]
+    mov esi, [sha1H2]
     mov dword [edi+8 ], esi
-    mov esi, [sha1_h3]
+    mov esi, [sha1H3]
     mov dword [edi+12], esi
-    mov esi, [sha1_h4]
+    mov esi, [sha1H4]
     mov dword [edi+16], esi
 
     xor ecx, ecx
-.section_d:
+.sectionD:
 
     mov esi, [edi+0]
     rol esi, 5 ; S^5(A)
@@ -322,7 +322,7 @@ digest:
     push dword [edi+4 ]  ; B
     push dword [edi+8 ]  ; C
     push dword [edi+12]  ; D
-    call function_f
+    call functionF
     pop ebx
 
     add esi, ebx
@@ -330,13 +330,13 @@ digest:
 
     mov ebx, ecx
     shl ebx, 2
-    add ebx, w_buff
+    add ebx, wBuff
     mov ebx, [ebx]
     bswap ebx
     add esi, ebx ; W(t)
 
     push ecx
-    call constants_k
+    call constantsK
     pop ebx
     add esi, ebx ; K(t)
 
@@ -360,37 +360,37 @@ digest:
 
     inc ecx
     cmp ecx, 80
-    jl .section_d
+    jl .sectionD
 
     mov eax, [ebp+8] ; output buffer
 
-    mov ebx, [sha1_h0]
+    mov ebx, [sha1H0]
     add ebx, [edi+0]
-    mov [sha1_h0], ebx
+    mov [sha1H0], ebx
     bswap ebx
     mov [eax], ebx
 
-    mov ebx, [sha1_h1]
+    mov ebx, [sha1H1]
     add ebx, [edi+4]
-    mov [sha1_h1], ebx
+    mov [sha1H1], ebx
     bswap ebx
     mov [eax+4], ebx
 
-    mov ebx, [sha1_h2]
+    mov ebx, [sha1H2]
     add ebx, [edi+8]
-    mov [sha1_h2], ebx
+    mov [sha1H2], ebx
     bswap ebx
     mov [eax+8], ebx
 
-    mov ebx, [sha1_h3]
+    mov ebx, [sha1H3]
     add ebx, [edi+12]
-    mov [sha1_h3], ebx
+    mov [sha1H3], ebx
     bswap ebx
     mov [eax+12], ebx
 
-    mov ebx, [sha1_h4]
+    mov ebx, [sha1H4]
     add ebx, [edi+16]
-    mov [sha1_h4], ebx
+    mov [sha1H4], ebx
     bswap ebx
     mov [eax+16], ebx
 
@@ -403,15 +403,15 @@ digest:
     pop ebp
     ret 4
 
-sha1_reset_h:
-    mov dword [sha1_h0], SHA1_H0_DEFAULT
-    mov dword [sha1_h1], SHA1_H1_DEFAULT
-    mov dword [sha1_h2], SHA1_H2_DEFAULT
-    mov dword [sha1_h3], SHA1_H3_DEFAULT
-    mov dword [sha1_h4], SHA1_H4_DEFAULT
+sha1ResetH:
+    mov dword [sha1H0], SHA1_H0_DEFAULT
+    mov dword [sha1H1], SHA1_H1_DEFAULT
+    mov dword [sha1H2], SHA1_H2_DEFAULT
+    mov dword [sha1H3], SHA1_H3_DEFAULT
+    mov dword [sha1H4], SHA1_H4_DEFAULT
     ret
 
-sha1_invalid_length: db "Invalid msg length given: ", 0
+sha1InvalidLength: db "Invalid msg length given: ", 0
 sha1:
     push ebp
     mov ebp, esp
@@ -420,11 +420,11 @@ sha1:
     push edi
     push esi
     
-    call sha1_reset_h
+    call sha1ResetH
     mov esi, [ebp+8]
-.cmp_start:
+.cmpStart:
     cmp dword esi, 0
-    jb .out_bounds
+    jb .outBounds
     cmp dword [ebp+8], 56
     jb .short
     cmp dword [ebp+8], SHA1_CHUNK_SIZE_BYTES
@@ -470,9 +470,9 @@ sha1:
     call digest
     sub dword [ebp+8], SHA1_CHUNK_SIZE_BYTES
     add dword [ebp+12], SHA1_CHUNK_SIZE_BYTES
-    jmp .cmp_start
-.out_bounds:
-    push dword sha1_invalid_length
+    jmp .cmpStart
+.outBounds:
+    push dword sha1InvalidLength
     call printMessage
     mov eax, esi
     sub esp, 4

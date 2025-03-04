@@ -11,18 +11,18 @@ section .data
     WS_MASK_KEY_SIZE equ 4 ; mask key is granteed to be 4 bytes in length
 
     WS_MAX_VALUE_UNSIGNED_16BIT equ 65535
-    ws_magic_string db "258EAFA5-E914-47DA-95CA-C5AB0DC85B11", 0
-    WS_MAGIC_STRING_LEN equ $ - ws_magic_string - 1
+    wsMagicString db "258EAFA5-E914-47DA-95CA-C5AB0DC85B11", 0
+    WS_MAGIC_STRING_LEN equ $ - wsMagicString - 1
 section .bss
-    ws_buffer: resb 128
-    ws_sha1_buff: resb SHA1_OUTPUT_SIZE_BYTES
+    wsBuffer: resb 128
+    wsSha1Buff: resb SHA1_OUTPUT_SIZE_BYTES
 
-    ws_headers: resb WS_HEADERS_SIZE
-    ws_mask_key: resb WS_MASK_KEY_SIZE
-    ws_req_data: resb 2*WS_MAX_VALUE_UNSIGNED_16BIT ; TODO: This number is just an estimate and does not represent anything!
-    ws_resp_buff: resb 2*WS_MAX_VALUE_UNSIGNED_16BIT ; TODO: This number is just an estimate and does not represent anything!
+    wsHeaders: resb WS_HEADERS_SIZE
+    wsMaskKey: resb WS_MASK_KEY_SIZE
+    wsReqData: resb 2*WS_MAX_VALUE_UNSIGNED_16BIT ; TODO: This number is just an estimate and does not represent anything!
+    wsRespBuff: resb 2*WS_MAX_VALUE_UNSIGNED_16BIT ; TODO: This number is just an estimate and does not represent anything!
 
-    ws_tmp_len: resb 4
+    wsTmpLen: resb 4
 
 section .text
 
@@ -35,7 +35,7 @@ wsSecAccept:
     push ecx
 
     mov eax, [ebp+8] ; sec-websocket-key
-    mov ebx, ws_buffer
+    mov ebx, wsBuffer
 
 .copyKey:
     mov cl, byte [eax]
@@ -49,29 +49,29 @@ wsSecAccept:
 .copyStr:
 
     push ebx
-    push ws_magic_string
-    push ws_magic_string
+    push wsMagicString
+    push wsMagicString
     call igetLength
     call memcpy
     pop eax
 
-    push ws_sha1_buff
-    push ws_buffer
-    push ws_buffer
+    push wsSha1Buff
+    push wsBuffer
+    push wsBuffer
     call igetLength
     call sha1
 
-    push ws_buffer
+    push wsBuffer
     push dword 0x0
     push 128
     call memset
 
     push dword SHA1_OUTPUT_SIZE_BYTES
-    push ws_buffer
-    push ws_sha1_buff
-    call b64_encode
+    push wsBuffer
+    push wsSha1Buff
+    call b64Encode
 
-    mov dword [ebp+8], ws_buffer
+    mov dword [ebp+8], wsBuffer
 
     pop ecx
     pop ebx
@@ -86,7 +86,7 @@ makeResponse:
     push ebx
     push ecx
 
-    ;//push dword ws_resp_buff
+    ;//push dword wsRespBuff
     ;//push dword 0x0
     ;//push dword 512
     ;//call memset
@@ -100,16 +100,16 @@ makeResponse:
 
     mov ecx, [ebp+12] ; msg len
     cmp ecx, 126
-    jb .smallest_msg_len
+    jb .smallestMsgLen
     cmp ecx, WS_MAX_VALUE_UNSIGNED_16BIT + 1
-    jb .medium_msg_len
-    jmp .largest_msg_len
+    jb .mediumMsgLen
+    jmp .largestMsgLen
 
-.smallest_msg_len:
+.smallestMsgLen:
     mov bh, cl
-    mov word [ws_resp_buff], bx
+    mov word [wsRespBuff], bx
 
-    push dword ws_resp_buff+2
+    push dword wsRespBuff+2
     push dword [ebp+8] ; message
     push ecx
     call memcpy
@@ -118,17 +118,17 @@ makeResponse:
     add dword [ebp+12], 2
     
     mov ecx, [ebp+12]
-    mov dword [ws_tmp_len], ecx
+    mov dword [wsTmpLen], ecx
     jmp .end
-.medium_msg_len:
+.mediumMsgLen:
     mov bh, 126
-    mov word [ws_resp_buff], bx
+    mov word [wsRespBuff], bx
 
     mov bx, cx
     xchg bl, bh ; length prepeared to be stored in big endian on memory
-    mov word [ws_resp_buff+2], bx
+    mov word [wsRespBuff+2], bx
 
-    push dword ws_resp_buff+4
+    push dword wsRespBuff+4
     push dword [ebp+8] ; message
     push ecx
     call memcpy
@@ -137,11 +137,11 @@ makeResponse:
     add dword [ebp+12], 4
     
     mov ecx, [ebp+12]
-    mov dword [ws_tmp_len], ecx
+    mov dword [wsTmpLen], ecx
     jmp .end
 
-.largest_msg_len:
-    mov ecx, [ws_tmp_len]
+.largestMsgLen:
+    mov ecx, [wsTmpLen]
     mov dword [ebp+12], ecx
     ;//add dword [ebp+12], 2 ;!! TEMPORARY !!
 .end:
@@ -181,7 +181,7 @@ unmaskData:
     pop ebp
     ret 12
 
-message_too_long_str: db "Received message is too long!", 10, 0
+messageTooLongStr: db "Received message is too long!", 10, 0
 parseRequest:
     push ebp
     mov ebp, esp
@@ -197,18 +197,18 @@ parseRequest:
     ; *TODO: Handle message splitted (check using FIN bit)
 
     xor ebx, ebx
-    push dword ws_headers
+    push dword wsHeaders
     push dword 0x0
     push dword WS_HEADERS_SIZE
     call memset
 
     push dword 2 ; only read the first 2 bytes for now
     push dword [ebp+8] ; websocket file descriptor
-	push ws_headers
+	push wsHeaders
 	call readSocket
     
     xor edx, edx
-    mov bl, byte [ws_headers+WS_PAYLOAD_OFFSET]
+    mov bl, byte [wsHeaders+WS_PAYLOAD_OFFSET]
     and bl, 0b01111111 ; removing the mask indicator bit from payload len byte
     ;//call printTerminator
     ;//call printTerminator
@@ -216,17 +216,17 @@ parseRequest:
     ;//call printInt
     ;//call printTerminator
     cmp bl, 126
-    jb .smallest_msg_len
+    jb .smallestMsgLen
     cmp bl, 126
-    jz .medium_msg_len
+    jz .mediumMsgLen
     cmp bl, 127
-    jz .largest_msg_len
+    jz .largestMsgLen
     jmp .end
 
-.smallest_msg_len:
+.smallestMsgLen:
     mov edi, ebx
     jmp .unmask
-.medium_msg_len:
+.mediumMsgLen:
     sub esp, 2
 
     mov edi, esp
@@ -241,7 +241,7 @@ parseRequest:
     mov edi, ebx
     jmp .unmask
 
-.largest_msg_len:
+.largestMsgLen:
     sub esp, 4
 
     mov edi, esp
@@ -264,25 +264,25 @@ parseRequest:
     ;//call printInt
     ;//call printInt
 
-    push dword ws_req_data
+    push dword wsReqData
     push dword 0x0
     push dword 512
     call memset
 
     push dword WS_MASK_KEY_SIZE
     push dword [ebp+8]
-    push ws_mask_key
+    push wsMaskKey
     call readSocket
 
     push edi ; message size in bytes
     push dword [ebp+8]
-    push ws_req_data
+    push wsReqData
     call readSocket
 
 
     push edi ; message size in bytes
-    push ws_req_data
-    push ws_mask_key
+    push wsReqData
+    push wsMaskKey
     call unmaskData
 
     call printTerminator
@@ -290,11 +290,11 @@ parseRequest:
     push '>'
     call printChar
     call printChar
-    push ws_req_data
+    push wsReqData
     call printMessage
 
     push edi
-    push ws_req_data
+    push wsReqData
     call makeResponse
     pop ecx
     mov dword [ebp+8], ecx ; return the response length

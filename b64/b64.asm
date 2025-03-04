@@ -2,10 +2,10 @@
 %define B64_INCLUDE
 section .text
 
-b64_index_table: db 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+b64IndexTable: db 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 ; populates given buffer by the b64 of the given byte array
-b64_encode:
+b64Encode:
     push ebp
     mov ebp, esp
     push eax
@@ -24,7 +24,7 @@ b64_encode:
     mov ah, byte [ebx]
     mov ecx, 6
 
-    .b64_byte:
+    .b64Byte:
     
     mov dh, ah
     shr dh, 7
@@ -39,13 +39,13 @@ b64_encode:
     cmp edx, 8
     jz .nextByte
 
-    loop .b64_byte
+    loop .b64Byte
     shr al, 1
 
     push ecx
     xor ecx, ecx
     mov cl, al
-    add ecx, b64_index_table
+    add ecx, b64IndexTable
     mov al, byte [ecx]
     pop ecx
 
@@ -53,7 +53,7 @@ b64_encode:
     xor al, al
     mov ecx, 6
     inc edi
-    jmp .b64_byte
+    jmp .b64Byte
 
 
     .end:
@@ -74,13 +74,13 @@ b64_encode:
 
     jz .eof
 
-    loop .b64_byte
+    loop .b64Byte
     shr al, 1
 
     push ecx
     xor ecx, ecx
     mov cl, al
-    add ecx, b64_index_table
+    add ecx, b64IndexTable
     mov al, byte [ecx]
     pop ecx
 
@@ -88,7 +88,7 @@ b64_encode:
     xor al, al
     mov ecx, 6
     inc edi
-    jmp .b64_byte
+    jmp .b64Byte
 
     .eof:
     dec ecx
@@ -98,7 +98,7 @@ b64_encode:
     push ecx
     xor ecx, ecx
     mov cl, al
-    add ecx, b64_index_table
+    add ecx, b64IndexTable
     mov al, byte [ecx]
     pop ecx
 

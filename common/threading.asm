@@ -16,7 +16,7 @@ fork:
     ret
 
 ; closes terminated child processes
-close_terminated:
+closeTerminated:
     push eax
     push ebx
     push ecx

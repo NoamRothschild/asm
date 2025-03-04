@@ -30,7 +30,7 @@ section .data
 
 section .text
 
-requestStruct:
+generateRequestStruct:
     push ebp
     mov ebp, esp
     push edx
@@ -44,10 +44,10 @@ requestStruct:
 
     push eax
     mov ecx, REQ_TOTAL_SIZE
-.clean_struct:
+.cleanStruct:
     mov byte [eax], 0
     inc eax
-    loop .clean_struct
+    loop .cleanStruct
     pop eax
 
     mov word [eax + REQ_RESP_CODE_OFFSET], 200 ; set 200 OK as default resp code
@@ -63,24 +63,24 @@ requestStruct:
     mov eax, [ebp+8] ; struct pointer
     mov ecx, METHOD_MAX_STR_LEN
     push edi ; save value in stack
-.method_byteLoop:
+.methodByteLoop:
     cmp byte [ebx], ' '
-    jz .endmethod_byteLoop
+    jz .endmethodByteLoop
     
     mov dl, byte [ebx]
     mov byte [edi], dl
 
     inc ebx
     inc edi
-    loop .method_byteLoop
-.endmethod_byteLoop:
+    loop .methodByteLoop
+.endmethodByteLoop:
     ; pop edi, push edi
     call getMethodType
     pop edx
     test edx, edx
-    jns .valid_method
+    jns .validMethod
     mov word [eax + REQ_RESP_CODE_OFFSET], 501 ; set 501 Not Implemented as resp code (can also be 405)
-    .valid_method:
+    .validMethod:
     mov byte [eax + REQ_METHOD_OFFSET], dl
 
     add esp, METHOD_MAX_STR_LEN ; deallocate tmp buff
@@ -90,32 +90,32 @@ requestStruct:
 
     mov ecx, REQ_PATH_SIZE
     dec ecx ; path size includes null terminator
-.goto_pathStart:
+.gotoPathStart:
     cmp byte [ebx], '/'
-    jz .path_byteLoop
+    jz .pathByteLoop
     inc ebx
-    jmp .goto_pathStart
+    jmp .gotoPathStart
 
-.path_byteLoop:
+.pathByteLoop:
     cmp byte [ebx], ' '
-    jz .endpath_byteLoop
+    jz .endpathByteLoop
 
     mov dl, byte [ebx]
     mov byte [edi], dl
 
     inc ebx
     inc edi
-    loop .path_byteLoop
+    loop .pathByteLoop
 
     cmp byte [ebx], ' '
-    jz .endpath_byteLoop
+    jz .endpathByteLoop
     mov word [eax + REQ_RESP_CODE_OFFSET], 414 ; set 414 Request-URI Too Long as resp code
 
     push ANSI_RED
     push STR_ERR_URI_TOO_LONG
     call printColored
 
-.endpath_byteLoop:
+.endpathByteLoop:
     mov byte [edi], 0 ; null terminate string
     
     mov edx, dword [DATA_START]
@@ -255,19 +255,19 @@ parseHeaders:
     call startswith
     pop edx
     cmp edx, 1
-    jz .sec_websocket_key
+    jz .secWebsocketKey
 
     push ebx
     push STR_WEBSOCKET_UPGRADE
     call startswith
     pop edx
     cmp edx, 1
-    jz .websocket_exists
+    jz .websocketExists
 
     ; ... do all other handling of headers
 
     jmp .nextHeader
-.sec_websocket_key:
+.secWebsocketKey:
     push ebx
 
     mov edx, ebx
@@ -281,22 +281,22 @@ parseHeaders:
     mov ecx, REQ_DATA_SIZE
     xor ebx, ebx
 
-.copy_websocket_sec:
+.copyWebsocketSec:
     mov bl, byte [edx]
 
     cmp bl, 0Dh
-    jz .end_copy_websocket_sec
+    jz .endCopyWebsocketSec
 
     mov byte [eax], bl
     inc eax
     inc edx
-    loop .copy_websocket_sec
-.end_copy_websocket_sec:
+    loop .copyWebsocketSec
+.endCopyWebsocketSec:
     mov byte [eax], 0
 
     pop ebx
     jmp .nextHeader
-.websocket_exists:
+.websocketExists:
     mov eax, [ebp+8] ; struct pointer
     mov dword [eax + REQ_RESP_CODE_OFFSET], 101 ; 101 Switching Protocol
     jmp .nextHeader
@@ -368,11 +368,11 @@ printHeaders:
     pop ebp
     ret 4
 
-str_log: db "Analisys of new packet:", 10, 0
-str_method: db "Method: ", 0
-str_path: db "Path: ", 0
-str_data: db "Data: ", 0
-str_status_code: db "Response status code: ", 0
+strLog: db "Analisys of new packet:", 10, 0
+strMethod: db "Method: ", 0
+strPath: db "Path: ", 0
+strData: db "Data: ", 0
+strStatusCode: db "Response status code: ", 0
 printStruct:
     push ebp
     mov ebp, esp
@@ -380,10 +380,10 @@ printStruct:
     push ebx
 
     mov eax, [ebp+8] ; struct
-    push str_log
+    push strLog
     call printMessage
 
-    push str_method
+    push strMethod
     call printMessage
     xor ebx, ebx
     mov bl, byte [eax + REQ_METHOD_OFFSET]
@@ -391,7 +391,7 @@ printStruct:
     call printInt
     call printTerminator
 
-    push str_path
+    push strPath
     call printMessage
     mov ebx, eax
     add ebx, REQ_PATH_OFFSET
@@ -399,7 +399,7 @@ printStruct:
     call printMessage
     call printTerminator
 
-    push str_data
+    push strData
     call printMessage
     mov ebx, eax
     add ebx, REQ_DATA_OFFSET
@@ -407,7 +407,7 @@ printStruct:
     call printMessage
     call printTerminator
 
-    push str_status_code
+    push strStatusCode
     call printMessage
     xor ebx, ebx
     mov bx, word [eax + REQ_RESP_CODE_OFFSET]
@@ -495,7 +495,7 @@ printReqFormatted:
     call printChar
     call printChar
     
-    push str_data
+    push strData
     call printMessage
     push ebx
     call printMessage

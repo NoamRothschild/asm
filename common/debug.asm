@@ -15,7 +15,7 @@ section .data
 section .text
 
 setDefaultColor:
-    push dword [esp+4] ; ansi_color
+    push dword [esp+4] ; ansiColor
     call printMessage
     ret 4
 resetDefaultColor:
@@ -23,7 +23,7 @@ resetDefaultColor:
     call printMessage
     ret
 
-;ansi_color, msg
+;ansiColor, msg
 printColored:
     push ebp
     mov ebp, esp
