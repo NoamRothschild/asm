@@ -28,6 +28,7 @@ section .data
     JS_EXT db 'js', 0
     ICO_EXT db 'ico', 0
     PNG_EXT db 'png', 0
+    BIN_EXT db 'bin', 0
 
     ; mime types
 
@@ -37,6 +38,7 @@ section .data
     JS_TYPE db 'application/javascript', 0
     ICO_TYPE db 'image/x-icon', 0
     PNG_TYPE db 'image/png', 0
+    BINARY_TYPE db 'application/octet-stream', 0
 section .bss
     responseBuffer: resb RESP_BUFFER_SIZE ; this buffer would hold the request sent to the client
     filedataBuffer: resb MAX_READ_BYTES_DISK_FILE
@@ -238,6 +240,13 @@ getMime:
     cmp edx, 1
     jz .png
 
+    push eax
+    push BIN_EXT
+    call strcmp
+    pop edx
+    cmp edx, 1
+    jz .bin
+
     ; assumes html if type not found
 .html:
     mov dword [ebp+8], HTML_TYPE
@@ -254,8 +263,11 @@ getMime:
 .ico:
     mov dword [ebp+8], ICO_TYPE
     jmp .end
-.png:
+.bin:
     mov dword [ebp+8], PNG_TYPE
+    jmp .end
+.png:
+    mov dword [ebp+8], BINARY_TYPE
     jmp .end ; Not needed but for visibility
 .end:
     pop edx

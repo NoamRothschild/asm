@@ -7,6 +7,7 @@ export class GameClient {
 
         this.socket.onopen = () => {
             this.#log('INFO: Connected to WebSocket server.');
+            this.socket.send('Connected');
         };
 
         this.socket.onclose = () => {
