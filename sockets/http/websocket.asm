@@ -79,6 +79,7 @@ wsSecAccept:
     pop ebp
     ret
 
+; !! TODO: Changed the return of the function to binary format!!!
 ; returns the response length
 makeResponse:
     push ebp
@@ -92,7 +93,7 @@ makeResponse:
     ;//call memset
 
     xor ebx, ebx
-    mov bl, 0x1 ; OPCODE, 0x1 for text (which is always encoded in UTF-8)
+    mov bl, 0x2 ; OPCODE, 0x1 for text (which is always encoded in UTF-8)
     or bl, 0b10000000 ; turn on FIN flag
     ;//shl bl, 4 ; position OPCODE
     ;//or bl, 0b00000001 ; turn on FIN flag
@@ -259,15 +260,6 @@ parseRequest:
     jmp .unmask
 
 .unmask:
-    ;//push edi
-    ;//push edx
-    ;//call printInt
-    ;//call printInt
-
-    push dword wsReqData
-    push dword 0x0
-    push dword 512
-    call memset
 
     push dword WS_MASK_KEY_SIZE
     push dword [ebp+8]
@@ -279,25 +271,13 @@ parseRequest:
     push wsReqData
     call readSocket
 
-
     push edi ; message size in bytes
     push wsReqData
     push wsMaskKey
     call unmaskData
 
-    call printTerminator
-    push ' '
-    push '>'
-    call printChar
-    call printChar
-    push wsReqData
-    call printMessage
-
-    push edi
-    push wsReqData
-    call makeResponse
-    pop ecx
-    mov dword [ebp+8], ecx ; return the response length
+    call dword [ebp+12] ; calling the given callback
+    mov dword [ebp+12], ecx ; return the response length
     jmp .end
 .end:
     pop edx
@@ -305,5 +285,38 @@ parseRequest:
     pop ecx
     pop ebx
     pop ebp
+    ret 4
+
+voxelSpaceResponse:
+    push edx
+
+    xor edx, edx
+    mov dl, byte [wsReqData]
+    push edx
+    call printChar
+    call printTerminator
+    push edx
+    call move_camera
+    call calc_frame
+
+    push dword SCREEN_WIDTH * SCREEN_HEIGHT
+    push framebuffer
+    call makeResponse
+    pop ecx
+    pop edx
+    ret
+
+printWSDebug:
+    call printTerminator
+    push ' '
+    push '>'
+    call printChar
+    call printChar
+    push wsReqData
+    call printMessage
+    push edi
+    push wsReqData
+    call makeResponse
+    pop ecx
     ret
 %endif

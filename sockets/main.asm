@@ -1,6 +1,7 @@
 %include '../common/general.asm'
 %include '../common/debug.asm'
 %include '../common/threading.asm'
+%include '../game_prototypes/voxel_space.asm'
 %include 'sockets.asm'
 %include 'http/http.asm'
 %include 'http/websocket.asm'
@@ -25,6 +26,9 @@ _start:
 	xor edi, edi
 	xor esi, esi
 
+    ; loading heightmap & colormap into memory for game
+    call init_files
+
     call createSocket
     mov edi, [esp]
     call bindSocket
@@ -39,7 +43,6 @@ _start:
     call acceptSocket ; waits here for a message to be sent
     pop esi
 
-    call closeTerminated
     call fork
     pop eax
     cmp eax, 0 ; when resulting in 0, executor is child process, else parent.
@@ -78,12 +81,13 @@ _start:
     cmp word [requestStruct + REQ_RESP_CODE_OFFSET], 101
     jnz .closeSocket
 .websocket:
-    
+    push dword voxelSpaceResponse
     push esi
     call parseRequest
     push esi
     push wsRespBuff
     call writeSocket
+    
     jmp .websocket
 
 .closeSocket:

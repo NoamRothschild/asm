@@ -11,6 +11,8 @@ fork:
 	int 80h
     mov [ebp+8], eax
 
+    call closeTerminated
+
     pop eax
     pop ebp
     ret
