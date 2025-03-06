@@ -199,7 +199,7 @@ get_heightonscreen:
     mov ebx, VOXEL_SCALE
     mul ebx
     mov ebx, [ebp+8]
-    xor edx, edx
+    cdq ; sign extends eax to edx (modifies edx based on eax's MSB)
     idiv ebx
 
     ; making limits to not go out of bounds
