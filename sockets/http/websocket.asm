@@ -293,9 +293,6 @@ voxelSpaceResponse:
     xor edx, edx
     mov dl, byte [wsReqData]
     push edx
-    call printChar
-    call printTerminator
-    push edx
     call move_camera
     call calc_frame
 
