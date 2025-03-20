@@ -296,11 +296,16 @@ voxelSpaceResponse:
     call move_camera
     call calc_frame
 
+    mov byte [wsReqData], 0
+
     push dword SCREEN_WIDTH * SCREEN_HEIGHT
     push framebuffer
     call makeResponse
     pop ecx
     pop edx
+    ret
+
+_return:
     ret
 
 printWSDebug:

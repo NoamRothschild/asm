@@ -1,7 +1,7 @@
 %include '../common/general.asm'
 %include '../common/debug.asm'
 %include '../common/threading.asm'
-%include '../game_prototypes/voxel_space.asm'
+%include '../game_prototypes/cubes.asm'
 %include 'sockets.asm'
 %include 'http/http.asm'
 %include 'http/websocket.asm'
@@ -27,7 +27,19 @@ _start:
 	xor esi, esi
 
     ; loading heightmap & colormap into memory for game
-    call init_files
+    ; call init_files
+
+    push dword PLAYERS_BUFFER_SIZE
+    call createSharedMemory
+    pop edx
+    cmp edx, -1 ; shmid or -1
+    jz .end
+    push edx
+    call attachSharedMemory
+    pop edx
+    cmp edx, -1 ; shmid or -1
+    jz .end
+    mov [playersRegionPtr], edx ; shmaddr
 
     call createSocket
     mov edi, [esp]
@@ -80,18 +92,39 @@ _start:
 
     cmp word [requestStruct + REQ_RESP_CODE_OFFSET], 101
     jnz .closeSocket
+    call registerPlayer
+    push esi
+    call setNonBlocking
+
+    ; making any error on ws force disconnect player.
+    mov ecx, .ws_disconnect
+    mov ebx, 11 ; seg fault
+    mov eax, 0x30 ; SYS_SIGNAL
+    int 0x80
 .websocket:
-    push dword voxelSpaceResponse
+    push esi
+    call hasData
+    pop ecx
+    cmp ecx, -1 ; close socket and free player slot if socket closed by client
+    jz .ws_disconnect
+    cmp ecx, 1 ; only parse if data was found
+    jnz .ws_send
+.ws_parse:
+    push dword _return
     push esi
     call parseRequest
+    add esp, 4
+.ws_send:
+    call voxelSpaceResponse
+    push ecx
     push esi
     push wsRespBuff
     call writeSocket
-    
     jmp .websocket
-
+.ws_disconnect:
+    call removePlayer
 .closeSocket:
     push esi
     call closeSocket
-
+.end:
     call exit
