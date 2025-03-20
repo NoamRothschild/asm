@@ -1,5 +1,23 @@
 %ifndef SOCKETS_INCLUDE
 %define SOCKETS_INCLUDE
+%include '../common/debug.asm'
+section .data
+	F_GETFL equ 3
+	F_SETFL equ 4
+	O_NONBLOCK equ 2048
+
+	pollfd:
+		.fd 	 dd 0
+		.events  dw 1
+		.revents dw 1
+
+	POLLIN  equ 1
+    POLLERR equ 8
+    POLLHUP equ 16
+	POLLNVAL equ 32
+	POLLRDHUP equ 8192
+
+section .text
 ; returns the file descriptor for the created socket
 createSocket:
     push dword [esp]
@@ -124,7 +142,7 @@ readSocket:
 
 	mov edx, [ebp+16] ; amm of bytes to read
 	mov ecx, [ebp+8] ; buffer*
-	mov ebx, [ebp+12] ; new socket identifying descriptor
+	mov ebx, [ebp+12] ; socket identifying descriptor
 	mov eax, 3 ; invokes SYS_READ (kernel opcode 3)
 	int 80h
 
@@ -166,4 +184,85 @@ closeSocket:
     pop eax
 	pop ebp
 	ret 4
+
+setNonBlocking:
+	push ebp
+	mov ebp, esp
+    push eax
+    push ebx
+	push ecx
+	push edx
+
+	mov ecx, F_GETFL
+    mov ebx, [ebp+8] ; socket file descriptor
+    mov eax, 0x37 ; fcntl
+    int 0x80
+	or eax, O_NONBLOCK ; activate nonblocking mode in flags
+
+	mov edx, eax ; flags
+	mov ecx, F_SETFL
+    mov ebx, [ebp+8] ; socket file descriptor
+    mov eax, 0x37 ; fcntl
+    int 0x80
+
+	pop edx
+	pop ecx
+    pop ebx
+    pop eax
+	pop ebp
+	ret 4
+
+strSocketErr: db "Connection closed || Error while reading socket.", 10, 0
+strSocketData: db "Found data on socket!", 10, 0
+; returns if the socket fd has data
+hasData:
+	push ebp
+	mov ebp, esp
+	push eax
+	push ebx
+
+	mov eax, [ebp+8]
+	mov [pollfd.fd], eax
+	mov word [pollfd.events], POLLIN
+
+	; timeout of 10ms
+	mov edx, 200 ; 1000ms/10 = 100 (100 times every second)
+	mov ecx, 1 ; number of fd's
+	mov ebx, pollfd
+	mov eax, 0xa8 ; SYS_POLL
+	int 0x80
+	cmp eax, 0
+	jbe .end
+
+	mov ebx, [pollfd.revents]
+	and ebx, POLLIN
+	cmp ebx, 0
+	jz .checkClosed
+.dataAvailable:
+	; push ANSI_GREEN
+	; push strSocketData
+	; call printColored
+	mov eax, 1
+	jmp .end
+.checkClosed:
+	mov eax, POLLHUP
+	or eax, POLLERR
+	or eax, POLLRDHUP
+	mov ebx, [pollfd.revents]
+	and ebx, eax
+	jz .setOk
+	mov eax, -1
+	push ANSI_RED
+	push strSocketErr
+	call printColored
+	jmp .end
+.setOk:
+	mov eax, 0
+.end:
+	mov [ebp+8], eax
+	pop ebx
+	pop eax
+	pop ebp
+	ret
+
 %endif
