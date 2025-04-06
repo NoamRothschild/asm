@@ -249,4 +249,78 @@ printInt:
     pop eax
     pop ebp
     ret 4
+
+str_invalid_format: db "Invalid format string: ", 0
+printf:
+  push ebp
+  mov ebp, esp
+
+  mov ebx, [ebp+8] ; format string
+  mov esi, ebx
+  lea edi, [ebp+8] ; stack* (for next args)
+  xor edx, edx
+  xor ecx, ecx
+.nextPart:
+  inc ecx
+  mov dl, byte [esi]
+  inc esi
+  cmp dl, 0
+  jz .print
+  cmp dl, '%'
+  jnz .nextPart
+  dec ecx
+
+.print:
+  push ebx
+  push ecx
+  push ecx
+
+  mov ecx, ebx  ; message
+  pop edx       ; length
+  mov ebx, 1		; write to STDOUT
+  mov eax, 4		; invokes SYS_WRITE (kernel opcode 4)
+  int 80h
+
+  pop ecx
+  pop ebx
+
+  xor edx, edx
+  lea ebx, [ebx + ecx + 1] ; next character after %
+  add edi, 4
+  mov dl, byte [ebx]
+  inc ebx
+  mov esi, ebx
+  xor ecx, ecx
+  
+  cmp dl, 0
+  jz .end
+  cmp dl, 'd'
+  jz .int
+  cmp dl, 's'
+  jz .str
+  cmp dl, '%' ; %% - print correctly
+  jz .mod
+
+  push ANSI_RED
+  push str_invalid_format
+  call printColored
+  push edx
+  call printChar
+  jmp .nextPart
+.int:
+  push dword [edi]
+  call printInt
+  jmp .nextPart
+.str:
+  push dword [edi]
+  call printMessage
+  jmp .nextPart
+.mod:
+  push '%'
+  call printChar
+  sub edi, 4
+  jmp .nextPart
+.end:
+  pop ebp
+  ret
 %endif
