@@ -254,6 +254,12 @@ str_invalid_format: db "Invalid format string: ", 0
 printf:
   push ebp
   mov ebp, esp
+  push eax
+  push ebx
+  push ecx
+  push edx
+  push esi
+  push edi
 
   mov ebx, [ebp+8] ; format string
   mov esi, ebx
@@ -283,6 +289,9 @@ printf:
 
   pop ecx
   pop ebx
+
+  cmp byte [esi-1], 0
+  jz .end
 
   xor edx, edx
   lea ebx, [ebx + ecx + 1] ; next character after %
@@ -321,6 +330,12 @@ printf:
   sub edi, 4
   jmp .nextPart
 .end:
+  pop edi
+  pop esi
+  pop edx
+  pop ecx
+  pop ebx
+  pop eax
   pop ebp
   ret
 %endif
