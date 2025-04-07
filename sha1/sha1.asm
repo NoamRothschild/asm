@@ -367,31 +367,31 @@ digest:
     mov ebx, [sha1H0]
     add ebx, [edi+0]
     mov [sha1H0], ebx
-    bswap ebx
+    bswap ebx         ; STORING AS BIG ENDIAN (UCOMMENT THESE TO STORE AS SMALL ENDIAN)
     mov [eax], ebx
 
     mov ebx, [sha1H1]
     add ebx, [edi+4]
     mov [sha1H1], ebx
-    bswap ebx
+    bswap ebx         ; STORING AS BIG ENDIAN (UCOMMENT THESE TO STORE AS SMALL ENDIAN)
     mov [eax+4], ebx
 
     mov ebx, [sha1H2]
     add ebx, [edi+8]
     mov [sha1H2], ebx
-    bswap ebx
+    bswap ebx         ; STORING AS BIG ENDIAN (UCOMMENT THESE TO STORE AS SMALL ENDIAN)
     mov [eax+8], ebx
 
     mov ebx, [sha1H3]
     add ebx, [edi+12]
     mov [sha1H3], ebx
-    bswap ebx
+    bswap ebx         ; STORING AS BIG ENDIAN (UCOMMENT THESE TO STORE AS SMALL ENDIAN)
     mov [eax+12], ebx
 
     mov ebx, [sha1H4]
     add ebx, [edi+16]
     mov [sha1H4], ebx
-    bswap ebx
+    bswap ebx         ; STORING AS BIG ENDIAN (UCOMMENT THESE TO STORE AS SMALL ENDIAN)
     mov [eax+16], ebx
 
     add esp, 4*6 ; deallocating variables

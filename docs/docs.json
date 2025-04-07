@@ -22,7 +22,7 @@
                 "return": []
             },
             "printHex": {
-                "description": "prints given memory buffer bytes in hexadecimal format",
+                "description": "prints given memory buffer bytes in hexadecimal format (big endian)",
                 "params": ["[#] amm of bytes to print", "[&] buffer pointer"],
                 "return": []
             },
@@ -205,7 +205,7 @@
     "sha1/": {
         "sha1.asm": {
             "sha1": {
-                "description": "hashes the given bytearray using sha-1",
+                "description": "hashes the given bytearray using sha-1 (stores output in big endian)",
                 "params": ["[&] 20 byte dest buffer pointer", "[&] src bytearray pointer", "[#] amm of bytes to process"],
                 "return": []
             },
