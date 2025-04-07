@@ -1,3 +1,6 @@
+%ifndef USERS_DB_INCLUDE
+%define USERS_DB_INCLUDE
+
 %include "../database/database.asm"
 %include "../common/threading.asm"
 %include "../common/debug.asm"
@@ -85,7 +88,7 @@ create_user:
   jnz .waitUnlocked
 
   mov byte [ebx + LOCKED_BYTE_OFFSET], 1 ; locking write
-  mov [eax + USR_ID_OFFSET], cl
+  mov [eax + USR_ID_OFFSET], cl ; copying user id
 
   lea ebx, [eax + USR_NAME_OFFSET]
   push ebx
@@ -106,6 +109,7 @@ create_user:
   mov cl, [eax + USR_ID_OFFSET]
   mov byte [eax + USR_TOTAL_SIZE + USR_ID_OFFSET], cl ; setting an invalid id for next user
 
+  mov ebx, [ebp + 8]
   mov byte [ebx + LOCKED_BYTE_OFFSET], 0 ; unlocking write
 
   pop ecx
@@ -113,3 +117,5 @@ create_user:
   pop eax
   pop ebp
   ret 16
+
+%endif
