@@ -1,3 +1,6 @@
+%ifndef DATABASE_INCLUDE
+%define DATABASE_INCLUDE
+
 %include "../common/threading.asm"
 %include "../common/debug.asm"
 %include "../common/string.asm"
@@ -94,3 +97,5 @@ append_data:
   pop ebx
   pop ebp
   ret 8
+
+%endif
