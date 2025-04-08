@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <!-- <img src="logo.svg" alt="logo" class="logo"> -->
+        <img src="banner.jpg" alt="banner" class="banner">
+        <div class="server-name">
+            Discord Server Name
+        </div>
+
+        <hr style="color: grey; width: 80%; margin-top: 10px;">
+
+        <div class="category">
+            <div class="category-header">
+                Server
+            </div>
+            <div class="category-channels">
+                <h4># Announcements</h4>
+                <h4># About this project</h4>
+            </div>
+        </div>
+
+        <div class="category">
+            <div class="category-header">
+                General
+            </div>
+            <div class="category-channels">
+                <h4 id="selected-channel"># General</h4>
+                <h4># Help</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-container">
+        <img src="logo.svg" alt="profile" class="profile-picture">
+        <div class="profile-info">
+            <div class="profile-name">
+                John Doe
+            </div>
+            <div class="profile-status">
+                Online
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="channel-bar">
+            <div class="channel-name"># general</div>
+        </div>
+        <div class="messages-container">
+            
+        </div>
+        <div class="message-input-container">
+            <textarea 
+                class="message-input" 
+                placeholder="Message #general"
+                rows="1"
+            ></textarea>
+            <button class="send-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.01 21L23 12 2.01 3 2 10L17 12 2 14L2.01 21Z" fill="#B9BBBE"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>

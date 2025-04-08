@@ -1,0 +1,273 @@
+body {
+    background-color: #2E2E34;
+    margin-left: 0px;
+    margin-top: 0px;
+    color: #85858c;
+    font-family: 'Poppins', sans-serif;
+}
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #28282D;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar > * {
+    margin-left: 10px;
+}
+
+.logo {
+    width: 10vh;
+    height: 10vh;
+    margin-top: 10px;
+
+    background-color: #424248;
+    border-radius: 5%;
+    border: 10px solid #424248;
+}
+
+.banner {
+    width: 100%;
+    margin-left: 0px;
+}
+
+
+.server-name {
+    padding-top: 10px;
+    font-weight: lighter;
+    font-size: 3vh;
+    color: #fff;
+}
+
+.category-channels > * {
+    width: 80%;
+    background-color: #424248;
+    border-radius: 5px;
+    border: 1px solid #424248;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 5px;
+    font-size: 2.5vh;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.category-channels > *:hover {
+    color: white;
+}
+
+#selected-channel {
+    color: #fff;
+}
+
+.category-header {
+    margin-bottom: 0px;
+    color: #fff;
+}
+
+.category {
+    margin-top: 20px;
+}
+
+.profile-container {
+    width: 250px;
+    height: 15vh;
+    background-color: #383838;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    border-top-right-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.profile-container > * {
+    margin-left: 15px;
+}
+
+.profile-picture {
+    width: 8vh;
+    height: 8vh;
+    border-radius: 15px;
+    object-fit: cover;
+}
+
+.profile-name {
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-status {
+    color: #85858c;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.content-area {
+    margin-left: 250px;
+    height: 100vh;
+    background-color: #2E2E34;
+    display: flex;
+    flex-direction: column;
+}
+
+.channel-bar {
+    height: 60px;
+    background-color: #28282D;
+    border-bottom: 1px solid #1a1a1d;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 250px;
+    z-index: 100;
+}
+
+.channel-name {
+    color: #ffffff;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.messages-container {
+    margin-top: 60px;
+    margin-bottom: 80px;
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.message {
+    display: flex;
+    margin-bottom: 20px;
+    padding: 10px;
+}
+
+.message-profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.message-content {
+    flex: 1;
+}
+
+.message-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.message-username {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.message-date {
+    color: #85858c;
+    font-size: 0.8em;
+}
+
+.message-text {
+    color: #dcddde;
+    line-height: 1.4;
+}
+
+.message-text a {
+    color: #00b0f4;
+    text-decoration: none;
+}
+
+.message-text a:hover {
+    text-decoration: underline;
+}
+
+.message-input-container {
+    background-color: #2E2E34;
+    padding: 20px;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 250px;
+    border-top: 1px solid #2E2E34;
+}
+
+.message-input {
+    flex: 1;
+    background-color: #40444B;
+    border: none;
+    border-radius: 8px;
+    padding: 11px;
+    color: white;
+    font-size: 1em;
+    resize: none;
+    max-height: 50vh;
+    min-height: 44px;
+    font-family: inherit;
+    height: 44px;
+    overflow-y: hidden;
+    line-height: 1.375;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.message-input:focus {
+    outline: none;
+}
+
+.message-input::placeholder {
+    color: #72767d;
+}
+
+.send-button {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.send-button:hover {
+    background-color: #40444B;
+}
+
+.send-button svg {
+    transition: fill 0.2s;
+}
+
+.send-button:hover svg {
+    fill: #dcddde;
+}
