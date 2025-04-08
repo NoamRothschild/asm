@@ -16,6 +16,7 @@ unixNow:
     mov ebp, esp
     push eax
     push ebx
+    push ecx
     push edx
 
     mov eax, 13
@@ -31,6 +32,7 @@ unixNow:
     mov [ebp+8], ebx
 
     pop edx
+    pop ecx
     pop ebx
     pop eax
     pop ebp
