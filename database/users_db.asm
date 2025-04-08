@@ -7,6 +7,7 @@
 %include "../common/string.asm"
 %include "../sha1/sha1.asm"
 %include "../common/general.asm"
+%include "../common/time.asm"
 
 section .data
   ; LOCKED_BYTE_OFFSET equ 0
@@ -103,6 +104,10 @@ create_user:
   call igetLength       ; get password length
   call sha1
 
+  push ecx             ; user id
+  push dword [ebp + 8] ; db*
+  call create_token
+
   mov ebx, [ebp + 20] ; props (isAdmin)
   mov [eax + USR_PROPS_OFFSET], bl
 
@@ -117,5 +122,80 @@ create_user:
   pop eax
   pop ebp
   ret 16
+
+get_usr_ptr:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push edx
+
+  xor edx, edx
+  mov eax, [ebp + 12] ; user id
+  mov ebx, USR_TOTAL_SIZE
+  mul ebx
+  add eax, USR_DATA_START_OFFSET
+  add eax, [ebp + 8] ; db*
+ 
+  mov [ebp + 12], eax
+  pop edx
+  pop ebx
+  pop eax
+  pop ebp
+  ret 4
+
+create_token:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push ecx
+  push edi
+  mov ecx, USR_NAME_SIZE + USR_PWD_SIZE + USR_ID_SIZE + 4
+  sub esp, ecx
+  mov edi, esp
+  push edi ; store for later
+
+  push dword [ebp + 12] ; user id
+  push dword [ebp + 8 ] ; db *
+  call get_usr_ptr
+  pop eax
+
+  lea ebx, [eax + USR_NAME_OFFSET]
+  push edi
+  push ebx
+  push dword USR_NAME_SIZE
+  call memcpy
+  
+  lea ebx, [eax + USR_PWD_OFFSET]
+  push ebx
+  push dword USR_PWD_SIZE
+  call memcpy
+
+  lea ebx, [eax + USR_ID_OFFSET]
+  push ebx
+  push dword USR_ID_SIZE
+  call memcpy
+  pop edi
+  
+  push dword 0
+  call unixNow
+  pop ebx
+  mov dword [edi], ebx
+
+  pop edi ; retreive base ptr of buffer
+  lea ebx, [eax + USR_TOKEN_OFFSET]
+  push ebx
+  push edi
+  push ecx
+  call sha1
+
+  add esp, ecx
+  pop edi
+  pop ecx
+  pop ebx
+  pop eax
+  pop ebp
+  ret 8
 
 %endif
