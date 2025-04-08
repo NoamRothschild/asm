@@ -106,13 +106,16 @@ create_user:
 
   push ecx             ; user id
   push dword [ebp + 8] ; db*
-  call create_token
+  call create_token    ; create token
 
   mov ebx, [ebp + 20] ; props (isAdmin)
   mov [eax + USR_PROPS_OFFSET], bl
 
   mov cl, [eax + USR_ID_OFFSET]
   mov byte [eax + USR_TOTAL_SIZE + USR_ID_OFFSET], cl ; setting an invalid id for next user
+
+  lea ebx, [eax + USR_TOKEN_OFFSET]
+  mov [ebp + 20], ebx
 
   mov ebx, [ebp + 8]
   mov byte [ebx + LOCKED_BYTE_OFFSET], 0 ; unlocking write
@@ -121,7 +124,7 @@ create_user:
   pop ebx
   pop eax
   pop ebp
-  ret 16
+  ret 12
 
 create_token:
   push ebp
@@ -177,6 +180,7 @@ create_token:
   pop ebp
   ret 8
 
+; get_usr_ptr(db*, user_id) -> usr_ptr
 get_usr_ptr:
   push ebp
   mov ebp, esp
@@ -254,7 +258,7 @@ get_usr_by_token:
   loop .nextUser
 
 .fail:
-  mov dword [ebp + 12], 0 
+  mov dword [ebp + 12], 0 ; return 0 if failed 
   jmp .end
 .found:
   mov dword [ebp + 12], eax ; return user ptr in db

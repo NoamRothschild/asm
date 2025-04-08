@@ -28,18 +28,21 @@ _start:
   push s_uname1
   push edi
   call create_user
+  add esp, 4
 
   push dword 0
   push s_pwd2
   push s_uname2
   push edi
   call create_user
+  add esp, 4
 
   push dword 1
   push s_pwd3
   push s_uname3
   push edi
   call create_user
+  add esp, 4
 
   jmp end
 

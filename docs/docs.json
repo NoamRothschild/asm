@@ -47,7 +47,7 @@
                 "return": []
             },
             "printUntil": {
-                "description": "prints a string of ASCII characters to stdout ending with given character",
+                "description": "prints a string until a specified character is encountered",
                 "params": ["[&] buffer pointer", "[#] terminator character"],
                 "return": []
             }
@@ -77,6 +77,11 @@
                 "description": "reads up to 255 bytes from stdin into buffer",
                 "params": ["[&] buffer pointer"],
                 "return": []
+            },
+            "memcmp": {
+                "description": "compares two memory buffers for equality",
+                "params": ["[&] buffer pointer 1", "[&] buffer pointer 2", "[#] length of buffers"],
+                "return": ["[#] (0 ? 1) - (false ? true)"]
             }
         },
         "threading.asm": {
@@ -89,6 +94,16 @@
                 "description": "closes terminated child processes since just calling exit is not enough",
                 "params": [],
                 "return": []
+            },
+            "createSharedMemory": {
+                "description": "creates a shared memory segment with specified size",
+                "params": ["[#] size in bytes"],
+                "return": ["[#] shared memory ID or -1 on error"]
+            },
+            "attachSharedMemory": {
+                "description": "attaches to a shared memory segment using its ID",
+                "params": ["[#] shared memory ID"],
+                "return": ["[#] pointer to shared memory or -1 on error"]
             }
         },
         "string.asm": {
@@ -118,9 +133,9 @@
                 "return": ["[#] (0 ? 1) - (false ? true)"]
             },
             "strstr": {
-                "description": "locates a substring in a string",
+                "description": "locates a substring within a string and returns a pointer to its start",
                 "params": ["[&] string pointer", "[&] substring pointer"],
-                "return": ["[&] substring start pointer (or NULL if not found)"]
+                "return": ["[&] pointer to start of substring or NULL if not found"]
             },
             "strcpy": {
                 "description": "copies the given string to the given location",
@@ -165,9 +180,9 @@
                 "return": []
             },
             "iLengthFile": {
-                "description": "returns the length of a file, or -1 on error",
+                "description": "returns the length of a file in bytes, or -1 on error",
                 "params": ["[&] filename pointer"],
-                "return": ["[#] length of the file (in bytes)"]
+                "return": ["[#] length of file in bytes"]
             }
         },
         "time.asm": {
@@ -187,7 +202,7 @@
                 "return": ["[#] Hour", "[#] Minute", "[#] Second"]
             },
             "timeFormatPrint": {
-                "description": "prints to stdout 'Yr/Mo/Dy Hr:Min:Sec' given a unix timestamp",
+                "description": "prints a formatted date/time string from a Unix timestamp",
                 "params": ["[#] Unix timestamp"],
                 "return": []
             }
@@ -196,8 +211,8 @@
     "b64/": {
         "b64.asm": {
             "b64Encode": {
-                "description": "encodes the given bytearray & stores into buffer",
-                "params": ["[#] length of message", "[&] dest buffer pointer", "[&] src buffer pointer"],
+                "description": "encodes a byte array into base64 format and stores it in a buffer",
+                "params": ["[#] length of input", "[&] output buffer pointer", "[&] input buffer pointer"],
                 "return": []
             }
         }
@@ -233,50 +248,64 @@
                 "description": "resets the h's values to the default ones",
                 "params": ["[&] 20 byte dest buffer pointer"],
                 "return": []
+            },
+            "makeChunk": {
+                "description": "creates a SHA1 chunk from a message by padding it according to the SHA1 specification",
+                "params": ["[#] message length", "[&] message pointer"],
+                "return": []
             }
         }
     },
     "sockets/": {
         "sockets.asm": {
             "createSocket": {
-            "description": "creates a socket and returns its file descriptor",
-            "params": [],
-            "return": ["[#] a file descriptor for the socket"]
-           },
-           "bindSocket": {
-            "description": "binds a socket to a port and a host",
-            "params": ["[#] socket file descriptor"],
-            "return": []
-           },
-           "listenSocket": {
-            "description": "invokes listen on given socket with a max queue length of 10",
-            "params": ["[#] socket file descriptor"],
-            "return": []
-           },
-           "acceptSocket": {
-            "description": "wait until a client has sent data to the socket",
-            "params": ["[#] socket file descriptor"],
-            "return": ["[#] connected socket file descriptor"]
-           },
-           "readSocket": {
-            "description": "reads the given socket file descriptor and stores its data in buffer",
-            "params": ["[#] amm of bytes to read", "[#] connected socket file descriptor", "[&] buffer pointer"],
-            "return": []
-           },
-           "writeSocket": {
-            "description": "writes to the given socket file descriptor the given buffer",
-            "params": ["[#] amm of bytes to write", "[#] connected socket file descriptor", "[&] buffer pointer"],
-            "return": []
-           },
-           "closeSocket": {
-            "description": "closes the given socket via its file descriptor",
-            "params": ["[#] socket file descriptor"],
-            "return": []
-           }
+                "description": "creates a socket and returns its file descriptor",
+                "params": [],
+                "return": ["[#] a file descriptor for the socket"]
+            },
+            "bindSocket": {
+                "description": "binds a socket to a port and a host",
+                "params": ["[#] socket file descriptor"],
+                "return": []
+            },
+            "listenSocket": {
+                "description": "invokes listen on given socket with a max queue length of 10",
+                "params": ["[#] socket file descriptor"],
+                "return": []
+            },
+            "acceptSocket": {
+                "description": "wait until a client has sent data to the socket",
+                "params": ["[#] socket file descriptor"],
+                "return": ["[#] connected socket file descriptor"]
+            },
+            "readSocket": {
+                "description": "reads the given socket file descriptor and stores its data in buffer",
+                "params": ["[#] amm of bytes to read", "[#] connected socket file descriptor", "[&] buffer pointer"],
+                "return": []
+            },
+            "writeSocket": {
+                "description": "writes to the given socket file descriptor the given buffer",
+                "params": ["[#] amm of bytes to write", "[#] connected socket file descriptor", "[&] buffer pointer"],
+                "return": []
+            },
+            "closeSocket": {
+                "description": "closes the given socket via its file descriptor",
+                "params": ["[#] socket file descriptor"],
+                "return": []
+            },
+            "setNonBlocking": {
+                "description": "sets a socket to non-blocking mode",
+                "params": ["[#] socket file descriptor"],
+                "return": []
+            },
+            "hasData": {
+                "description": "checks if a socket has data available to read",
+                "params": ["[#] socket file descriptor"],
+                "return": ["[#] (0 ? 1) - (false ? true)"]
+            }
         },
         "http/client_request.asm": {
-
-            "requestStruct": {
+            "generateRequestStruct": {
                 "description": "creates a special struct from the parsed HTTP client request",
                 "params": ["[&] HTTP request buffer pointer", "[&] struct pointer (length must be above REQ_TOTAL_SIZE)"],
                 "return": []
@@ -319,9 +348,9 @@
                 "return": ["[&] buffer pointer pointing to the str representing given status code (EX: '200 OK')"]
             },
             "getMime": {
-                "description": "given a file extension return its mime type",
-                "params": ["[&] file extension pointer (without the '.')"],
-                "return": ["[&] buffer pointer pointing to the str representing the MIME for the given extension"]
+                "description": "returns the MIME type string for a given file extension",
+                "params": ["[&] file extension pointer"],
+                "return": ["[&] MIME type string pointer"]
             },
             "getExtension": {
                 "description": "returns a ptr to the start of the file extension (after the first '.')",
@@ -334,6 +363,67 @@
                 "description": "given the sec-websocket-key and a buffer pointer, stores inside buffer the response",
                 "params": ["[&] sec-websocket-key str ptr"],
                 "return": ["[&] pointer to the ws_buffer containing resulted auth result."]
+            },
+            "makeResponse": {
+                "description": "creates a WebSocket response frame with the given message (stored in wsRespBuff)",
+                "params": ["[#] message length", "[&] message pointer"],
+                "return": ["[#] response length"]
+            },
+            "unmaskData": {
+                "description": "unmasks WebSocket data using the provided mask key",
+                "params": ["[#] message length", "[&] message pointer", "[&] mask key pointer"],
+                "return": []
+            },
+            "parseRequest": {
+                "description": "parses a WebSocket request frame and extracts the message",
+                "params": ["[&] callback function pointer (read sockes/readme.md for help)", "[#] socket file descriptor"],
+                "return": ["[#] response length"]
+            }
+        }
+    },
+    "database/": {
+        "database.asm": {
+            "create_database": {
+                "description": "creates a new database in shared memory with the specified size",
+                "params": ["[#] size in bytes"],
+                "return": ["[&] database pointer or -1 on error"]
+            },
+            "append_data": {
+                "description": "appends data to the end of the database's linked list",
+                "params": ["[&] database pointer", "[&] data pointer"],
+                "return": []
+            }
+        },
+        "users_db.asm": {
+            "create_users_database": {
+                "description": "creates a new users database with space for the specified number of users",
+                "params": ["[#] maximum number of users"],
+                "return": ["[&] database pointer or -1 on error"]
+            },
+            "create_user": {
+                "description": "creates a new user in the database with the given credentials",
+                "params": ["[#] isAdmin flag", "[&] password pointer", "[&] username pointer", "[&] database pointer"],
+                "return": ["[&] token pointer (20 bytes)"]
+            },
+            "create_token": {
+                "description": "creates a unique token for a user based on their credentials and current time",
+                "params": ["[#] user ID", "[&] database pointer"],
+                "return": []
+            },
+            "get_usr_ptr": {
+                "description": "returns a pointer to a user's data in the database given their ID",
+                "params": ["[#] user ID", "[&] database pointer"],
+                "return": ["[&] user data pointer"]
+            },
+            "get_user_count": {
+                "description": "returns the total number of users in the database",
+                "params": ["[&] database pointer"],
+                "return": ["[#] number of users"]
+            },
+            "get_usr_by_token": {
+                "description": "finds a user in the database by their authentication token",
+                "params": ["[&] token pointer", "[&] database pointer"],
+                "return": ["[&] user data pointer or NULL if not found"]
             }
         }
     }
