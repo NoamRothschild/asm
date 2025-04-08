@@ -20,43 +20,43 @@ CODESEG
 ;	Time Complexity: O(n)
 ; -====================================================================-
 proc min
-	push bp
-	mov bp, sp
-	push ax
-	push bx
-	push cx
-	push dx
-	xor dx, dx
-	
-	mov cx, [bp+6] ; cx -> length
-	mov bx, [bp+4] ; bx -> start ptr
-	add cx, bx 
-	dec cx ; last element ptr
-	mov dl, [byte ptr bx]
-	mov ax, bx
-	
-	min_loop:
-		cmp bx, cx
-		jz min_end
+  push bp
+  mov bp, sp
+  push ax
+  push bx
+  push cx
+  push dx
+  xor dx, dx
+  
+  mov cx, [bp+6] ; cx -> length
+  mov bx, [bp+4] ; bx -> start ptr
+  add cx, bx 
+  dec cx ; last element ptr
+  mov dl, [byte ptr bx]
+  mov ax, bx
+  
+  min_loop:
+  	cmp bx, cx
+  	jz min_end
 
-		cmp [byte ptr bx], dl
-		jl min_new
+  	cmp [byte ptr bx], dl
+  	jl min_new
 
-		inc bx
-		jmp min_loop
-	min_new:
-		mov dl, [byte ptr bx]
-		mov ax, bx ; ax->smallest*
-		inc bx
-		jmp min_loop
-	min_end:
-	mov [bp+6], ax
-	pop dx
-	pop cx
-	pop bx
-	pop ax
-	pop bp
-	ret 2
+  	inc bx
+  	jmp min_loop
+  min_new:
+  	mov dl, [byte ptr bx]
+  	mov ax, bx ; ax->smallest*
+  	inc bx
+  	jmp min_loop
+  min_end:
+  mov [bp+6], ax
+  pop dx
+  pop cx
+  pop bx
+  pop ax
+  pop bp
+  ret 2
 endp
 
 ; -====================================================================-
@@ -71,28 +71,28 @@ endp
 ;	Time Complexity: O(1)
 ; -====================================================================-
 proc swap
-	push bp
-	mov bp, sp
+  push bp
+  mov bp, sp
 
-	push ax
-	push bx
-	push cx
-	push si
+  push ax
+  push bx
+  push cx
+  push si
 
-	mov si, [bp+6] ; ptr1*
-	mov bx, [bp+4] ; min*
+  mov si, [bp+6] ; ptr1*
+  mov bx, [bp+4] ; min*
 
-	mov al, [bx]
-	mov cl, [si]
-	mov [si], al
-	mov [bx], cl
+  mov al, [bx]
+  mov cl, [si]
+  mov [si], al
+  mov [bx], cl
 
-	pop si
-	pop cx
-	pop bx
-	pop ax
-	pop bp
-	ret 4
+  pop si
+  pop cx
+  pop bx
+  pop ax
+  pop bp
+  ret 4
 endp
 
 ; -====================================================================-
@@ -107,59 +107,59 @@ endp
 ;	Time Complexity: O(n^2)
 ; -====================================================================-
 proc selectionSort
-	push bp
-	mov bp, sp
-	push bx
-	push cx
-	push dx
+  push bp
+  mov bp, sp
+  push bx
+  push cx
+  push dx
 
-	mov bx, [bp+4] ; array head pointer
-	mov cx, [bp+6] ; array length
-	add cx, bx
-	mov dx, cx
-	dec cx
-	_LOP:
-		; list length
-		; (len + offset list) - bx
-		push dx
-		; head ptr
-		push bx
-		call min
+  mov bx, [bp+4] ; array head pointer
+  mov cx, [bp+6] ; array length
+  add cx, bx
+  mov dx, cx
+  dec cx
+  _LOP:
+  	; list length
+  	; (len + offset list) - bx
+  	push dx
+  	; head ptr
+  	push bx
+  	call min
 
-		; push [bx] -> list[index]
-		push bx
-		call swap ; min ptr is already in stack so no need to take it out
+  	; push [bx] -> list[index]
+  	push bx
+  	call swap ; min ptr is already in stack so no need to take it out
 
-		cmp bx, cx
-		jz _END
-		inc bx
-		dec dx
-		jmp _LOP
-	_END:
+  	cmp bx, cx
+  	jz _END
+  	inc bx
+  	dec dx
+  	jmp _LOP
+  _END:
 
-	pop dx
-	pop cx
-	pop bx
-	pop bp
-	ret
+  pop dx
+  pop cx
+  pop bx
+  pop bp
+  ret
 endp
 
 start:
-	mov ax, @data
-	mov ds, ax
-	xor ax, ax
-	xor si, si
-	xor di, di
+  mov ax, @data
+  mov ds, ax
+  xor ax, ax
+  xor si, si
+  xor di, di
 ; --------------------------
-	mov al, [len]
-	push ax ; push len
-	push offset list
-	call selectionSort
+  mov al, [len]
+  push ax ; push len
+  push offset list
+  call selectionSort
 ; --------------------------
 
 exit:
-	mov ax, 4c00h
-	int 21h
+  mov ax, 4c00h
+  int 21h
 END start
 
 
