@@ -74,6 +74,40 @@ memset:
     pop ebp
     ret 12
 
+memcmp:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push ecx
+  push edx
+  mov eax, [ebp + 16] ; ptr2
+  mov ebx, [ebp + 12] ; ptr1
+  mov ecx, [ebp + 8 ] ; length
+
+  mov dword [ebp + 16], 1 ; assume equality
+  cmp ecx, 1
+  jl .end ; handle negative or 0 lengthed buffers
+
+.byteLoop:
+  mov dl, byte [eax]
+  cmp dl, byte [ebx]
+  jnz .fail
+  inc eax
+  inc ebx
+  
+  loop .byteLoop
+  jmp .end
+.fail:
+  mov dword [ebp + 16], 0
+.end:
+  pop edx
+  pop ecx
+  pop ebx
+  pop eax
+  pop ebp
+  ret 8
+
 chrtoi:
     push    ebx             ; preserve ebx on the stack to be restored after function runs
     push    ecx             ; preserve ecx on the stack to be restored after function runs

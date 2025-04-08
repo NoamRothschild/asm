@@ -123,27 +123,6 @@ create_user:
   pop ebp
   ret 16
 
-get_usr_ptr:
-  push ebp
-  mov ebp, esp
-  push eax
-  push ebx
-  push edx
-
-  xor edx, edx
-  mov eax, [ebp + 12] ; user id
-  mov ebx, USR_TOTAL_SIZE
-  mul ebx
-  add eax, USR_DATA_START_OFFSET
-  add eax, [ebp + 8] ; db*
- 
-  mov [ebp + 12], eax
-  pop edx
-  pop ebx
-  pop eax
-  pop ebp
-  ret 4
-
 create_token:
   push ebp
   mov ebp, esp
@@ -197,5 +176,94 @@ create_token:
   pop eax
   pop ebp
   ret 8
+
+get_usr_ptr:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push edx
+
+  xor edx, edx
+  mov eax, [ebp + 12] ; user id
+  mov ebx, USR_TOTAL_SIZE
+  mul ebx
+  add eax, USR_DATA_START_OFFSET
+  add eax, [ebp + 8] ; db*
+ 
+  mov [ebp + 12], eax
+  pop edx
+  pop ebx
+  pop eax
+  pop ebp
+  ret 4
+
+get_user_count:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ecx
+
+  mov eax, [ebp + 8] ; db*
+  lea eax, [eax + USR_DATA_START_OFFSET]
+  xor ecx, ecx
+
+  dec cl ; fix first loop
+  sub eax, USR_TOTAL_SIZE
+.findLast:
+  inc cl
+  add eax, USR_TOTAL_SIZE
+  cmp byte [eax + USR_ID_OFFSET], cl
+  jz .findLast
+
+  mov dword [ebp + 8], ecx
+  pop ecx
+  pop eax
+  pop ebp
+  ret
+
+get_usr_by_token:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push ecx
+  push edx
+
+  mov eax, [ebp + 8] ; db*
+  push eax ; db* 
+  call get_usr_ptr
+  pop ecx
+
+  cmp ecx, 0
+  jz .fail
+
+  add eax, USR_DATA_START_OFFSET
+.nextUser:
+  
+  lea ebx, [eax + USR_TOKEN_OFFSET]
+  push dword [ebp + 12] ; token*
+  push ebx
+  push USR_TOKEN_SIZE
+  call memcmp
+  pop edx
+  cmp edx, 1 ; equal?
+  jz .found
+ 
+  add eax, USR_TOTAL_SIZE 
+  loop .nextUser
+
+.fail:
+  mov dword [ebp + 12], 0 
+  jmp .end
+.found:
+  mov dword [ebp + 12], eax ; return user ptr in db
+.end:
+  pop edx
+  pop ecx
+  pop ebx
+  pop eax
+  pop ebp
+  ret 4
 
 %endif
