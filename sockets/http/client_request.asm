@@ -88,6 +88,13 @@ generateRequestStruct:
   mov edi, eax
   add edi, REQ_PATH_OFFSET
 
+  mov byte [edi], '/'
+  inc edi
+  push edi
+  push dword [ebp+16]
+  call strcpy
+  pop edi
+
   mov ecx, REQ_PATH_SIZE
   dec ecx ; path size includes null terminator
 .gotoPathStart:
@@ -153,7 +160,7 @@ generateRequestStruct:
   pop ebx
   pop edx
   pop ebp
-  ret 8
+  ret 12
 
 STR_GET: db "GET", 0
 STR_POST: db "POST", 0

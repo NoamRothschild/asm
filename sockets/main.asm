@@ -6,9 +6,8 @@
 %include 'http/http.asm'
 %include 'http/websocket.asm'
 section .data
-  response db 'HTTP/1.1 200 OK', 0Dh, 0Ah, 'Content-Type: text/html', 0Dh, 0Ah, 'Content-Length: 14', 0Dh, 0Ah, 0Dh, 0Ah, 'Hello World!', 0Dh, 0Ah, 0h
-
   tracebackFile db "temporary/index.html", 0
+  basePath db 'resources', 0
 section .bss
   buffer: resb 4096
   _tmp: resb 1 ; here only for easier printing since I rely on null terminators
@@ -75,6 +74,7 @@ _start:
   push buffer
   call printColored
   
+  push basePath
   push buffer
   push requestStruct
   call generateRequestStruct

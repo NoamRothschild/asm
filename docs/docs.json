@@ -307,7 +307,7 @@
         "http/client_request.asm": {
             "generateRequestStruct": {
                 "description": "creates a special struct from the parsed HTTP client request",
-                "params": ["[&] HTTP request buffer pointer", "[&] struct pointer (length must be above REQ_TOTAL_SIZE)"],
+                "params": ["[&] base path pointer", "[&] HTTP request buffer pointer", "[&] struct pointer (length must be above REQ_TOTAL_SIZE)"],
                 "return": []
             },
             "printStruct": {
