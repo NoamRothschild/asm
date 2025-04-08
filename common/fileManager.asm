@@ -100,11 +100,15 @@ readFile: ; (unsigned int fd, char *buf, sizeT count)
 closeFile:
   push ebp
   mov ebp, esp
+  push eax
+  push ebx
 
   mov ebx, [esp+8] ; file descriptor
   mov eax, 6
   int 80h
 
+  pop ebx
+  pop eax
   pop ebp
   ret 4
 
@@ -166,6 +170,9 @@ iLengthFile:
   push dword [ebp+8] ; filename
   call openFile
   pop eax
+  cmp eax, -1
+  jz .end
+  push eax
 
   mov edx, 2  ; whence argument (SEEK_END)
   mov ecx, 0  ; move the cursor 0 bytes
@@ -174,9 +181,21 @@ iLengthFile:
   int 80h  ; call the kernel
 
   test eax, eax
-  jns .end
-  mov eax, -1
+  js .fail
+  call closeFile
 
+  mov ebx, -1
+  shr ebx, 1
+  cmp eax, ebx
+  jz .directory
+  
+  jmp .end
+.directory:
+  mov eax, -1
+  jmp .end
+.fail:
+  mov eax, -1
+  add esp, 4
 .end:
   mov [ebp+8], eax
   pop edx

@@ -92,10 +92,12 @@ respondHttp:
   test ecx, ecx
   jns .readFile
 
+.handle404:
   ; handle file not found here (404)
   mov word [ebx + REQ_RESP_CODE_OFFSET], 404
 
-  push dword [ebp + 12] ; traceback file name 
+  mov edx, [ebp + 12] ; traceback file name 
+  push edx
   call iLengthFile
   pop ecx ; file length
 

@@ -123,6 +123,11 @@ generateRequestStruct:
   call printColored
 
 .endpathByteLoop:
+  cmp byte [edi - 1], '/'
+  jnz .validPathEnding
+  mov byte [edi - 1], 0
+
+.validPathEnding:
   mov byte [edi], 0 ; null terminate string
   
   mov edx, dword [DATA_START]
