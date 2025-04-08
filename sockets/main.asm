@@ -8,6 +8,7 @@
 section .data
   response db 'HTTP/1.1 200 OK', 0Dh, 0Ah, 'Content-Type: text/html', 0Dh, 0Ah, 'Content-Length: 14', 0Dh, 0Ah, 0Dh, 0Ah, 'Hello World!', 0Dh, 0Ah, 0h
 
+  tracebackFile db "temporary/index.html", 0
 section .bss
   buffer: resb 4096
   _tmp: resb 1 ; here only for easier printing since I rely on null terminators
@@ -81,6 +82,7 @@ _start:
   push requestStruct
   call printReqFormatted
 
+  push tracebackFile
   push requestStruct
   call respondHttp
   pop edx
@@ -128,3 +130,22 @@ _start:
   call closeSocket
 .end:
   call exit
+
+voxelSpaceResponse:
+  push edx
+
+  xor edx, edx
+  mov dl, byte [wsReqData]
+  push edx
+  call move_camera
+  call calc_frame
+
+  mov byte [wsReqData], 0
+
+  push dword SCREEN_WIDTH * SCREEN_HEIGHT
+  push framebuffer
+  call makeResponse
+  pop ecx
+  pop edx
+  ret
+

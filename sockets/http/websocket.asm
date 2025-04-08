@@ -4,7 +4,7 @@
 %include '../b64/b64.asm'
 %include '../common/general.asm'
 %include '../common/debug.asm'
-%include 'sockets.asm'
+%include '../sockets/sockets.asm'
 section .data
   WS_HEADERS_SIZE equ 10 ; maximum length the headers can take (not including mask key)
   WS_PAYLOAD_OFFSET equ 1 ;
@@ -286,24 +286,6 @@ parseRequest:
   pop ebx
   pop ebp
   ret 4
-
-voxelSpaceResponse:
-  push edx
-
-  xor edx, edx
-  mov dl, byte [wsReqData]
-  push edx
-  call move_camera
-  call calc_frame
-
-  mov byte [wsReqData], 0
-
-  push dword SCREEN_WIDTH * SCREEN_HEIGHT
-  push framebuffer
-  call makeResponse
-  pop ecx
-  pop edx
-  ret
 
 _return:
   ret

@@ -10,7 +10,6 @@ section .data
   ; RESP_TEMPLATE does not include a % for data!!! (to support binary data)
   RESP_TEMPLATE db 'HTTP/1.1 %', 0Dh, 0Ah, 'Content-Type: %', 0Dh, 0Ah, 'Connection: close', 0Dh, 0Ah, 'Content-Length: %', 0Dh, 0Ah, 0Dh, 0Ah, 0
   WS_TEMPLATE db 'HTTP/1.1 101 Switching Protocols', 0Dh, 0Ah, 'Upgrade: websocket', 0Dh, 0Ah, 'Connection: Upgrade', 0Dh, 0Ah, 'Sec-WebSocket-Accept: %', 0Dh, 0Ah, 0Dh, 0Ah, 0
-  TRACEBACK_FILE db 'temporary/index.html', 0 ; file to be displayed when the path provided an invalid file
 
   ; response codes
 
@@ -30,6 +29,7 @@ section .data
   ICO_EXT db 'ico', 0
   PNG_EXT db 'png', 0
   BIN_EXT db 'bin', 0
+  SVG_EXT db 'svg', 0
 
   ; mime types
 
@@ -40,6 +40,7 @@ section .data
   ICO_TYPE db 'image/x-icon', 0
   PNG_TYPE db 'image/png', 0
   BINARY_TYPE db 'application/octet-stream', 0
+  SVG_TYPE db 'image/svg+xml', 0
 section .bss
   responseBuffer: resb RESP_BUFFER_SIZE ; this buffer would hold the request sent to the client
   filedataBuffer: resb MAX_READ_BYTES_DISK_FILE
@@ -71,7 +72,7 @@ respondHttp:
   add esp, 2*4
   sub edi, responseBuffer
 
-  mov [ebp+8], edi
+  mov [ebp+12], edi
 
   jmp .end
 
@@ -93,9 +94,8 @@ respondHttp:
 
   ; handle file not found here (404)
   mov word [ebx + REQ_RESP_CODE_OFFSET], 404
-  mov edx, TRACEBACK_FILE ; change the file path to the one of a valid file
 
-  push edx
+  push dword [ebp + 12] ; traceback file name 
   call iLengthFile
   pop ecx ; file length
 
@@ -148,7 +148,7 @@ respondHttp:
 
   sub edi, responseBuffer ; return only the length of the response buffer
 
-  mov [ebp+8], edi
+  mov [ebp+12], edi
 
   ;//add esp, MAX_READ_BYTES_DISK_FILE
   add esp, FILE_LENGTH_STR_SIZE
@@ -160,7 +160,7 @@ respondHttp:
   pop ebx
   pop eax
   pop ebp
-  ret 
+  ret 4
 
 ; given a status code (number), return its string representation pointer
 getResonseCodeStr:
@@ -254,6 +254,12 @@ getMime:
   cmp edx, 1
   jz .bin
 
+  push eax
+  push SVG_EXT
+  call strcmp
+  pop edx
+  cmp edx, 1
+  jz .svg
   ; assumes html if type not found
 .html:
   mov dword [ebp+8], HTML_TYPE
@@ -275,7 +281,10 @@ getMime:
   jmp .end
 .png:
   mov dword [ebp+8], BINARY_TYPE
-  jmp .end ; Not needed but for visibility
+  jmp .end
+.svg:
+  mov dword [ebp+8], SVG_TYPE
+  jmp .end
 .end:
   pop edx
   pop eax

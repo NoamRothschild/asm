@@ -339,7 +339,7 @@
         "http/server_response.asm": {
             "respondHttp": {
                 "description": "takes a client request struct and creates a response buffer",
-                "params": ["[&] HTTP request buffer pointer"],
+                "params": ["[&] traceback file name pointer", "[&] HTTP request buffer pointer"],
                 "return": ["[#] length of full response in bytes"]
             },
             "getResonseCodeStr": {
