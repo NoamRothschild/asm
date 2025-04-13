@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Discord</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Welcome back!</h1>
+            <p>We're so excited to see you again!</p>
+        </div>
+        
+        <form class="login-form" id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="error-message" id="error-message"></div>
+            
+            <button type="submit" class="login-button">Log In</button>
+        </form>
+        
+        <div class="register-link">
+            Need an account? <a href="register.html">Register</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const errorMessage = document.getElementById('error-message');
+            
+            // Check for error parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('err');
+            
+            if (error) {
+                errorMessage.style.display = 'block';
+                
+                switch (error) {
+                    case 'ws_error':
+                        errorMessage.textContent = 'Connection error. Please login again.';
+                        break;
+                    case 'invalid_credentials':
+                        errorMessage.textContent = 'Invalid username or password.';
+                        break;
+                    default:
+                        errorMessage.textContent = 'An error occurred. Please try again.';
+                }
+            }
+            
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // Here you would typically send the credentials to your server
+                // For now, we'll just simulate a login
+                
+                // Store username in localStorage for the main app
+                localStorage.setItem('username', username);
+                
+                // Redirect to the main app
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>

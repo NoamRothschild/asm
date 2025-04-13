@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Discord</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="register.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Create an account</h1>
+            <p>Join our community today!</p>
+        </div>
+        
+        <form class="login-form register-form" id="register-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+            
+            <div class="terms">
+                By registering, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+            </div>
+            
+            <div class="error-message" id="error-message"></div>
+            
+            <button type="submit" class="login-button">Register</button>
+        </form>
+        
+        <div class="login-link">
+            Already have an account? <a href="login.html">Log In</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const registerForm = document.getElementById('register-form');
+            const errorMessage = document.getElementById('error-message');
+            
+            // Check for error parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('err');
+            
+            if (error) {
+                errorMessage.style.display = 'block';
+                
+                switch (error) {
+                    case 'username_taken':
+                        errorMessage.textContent = 'Username is already taken.';
+                        break;
+                    case 'password_mismatch':
+                        errorMessage.textContent = 'Passwords do not match.';
+                        break;
+                    default:
+                        errorMessage.textContent = 'An error occurred. Please try again.';
+                }
+            }
+            
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                // Validate passwords match
+                if (password !== confirmPassword) {
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'Passwords do not match.';
+                    return;
+                }
+                
+                // Here you would typically send the registration data to your server
+                // For now, we'll just simulate a successful registration
+                
+                // Store username in localStorage for the main app
+                localStorage.setItem('username', username);
+                
+                // Redirect to the main app
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html> 

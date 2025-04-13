@@ -1,0 +1,36 @@
+.register-form .form-group {
+    margin-bottom: 16px;
+}
+
+.terms {
+    margin-top: 16px;
+    margin-bottom: 20px;
+    color: #b9bbbe;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.terms a {
+    color: #7289da;
+    text-decoration: none;
+}
+
+.terms a:hover {
+    text-decoration: underline;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #72767d;
+    font-size: 14px;
+}
+
+.login-link a {
+    color: #7289da;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
