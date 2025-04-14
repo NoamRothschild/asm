@@ -214,6 +214,11 @@
                 "description": "encodes a byte array into base64 format and stores it in a buffer",
                 "params": ["[#] length of input", "[&] output buffer pointer", "[&] input buffer pointer"],
                 "return": []
+            },
+            "b64Decode": {
+                "description": "decodes a base64 encoded string into a byte array and stores it in a buffer",
+                "params": ["[&] output buffer pointer", "[&] b64 string pointer"],
+                "return": []
             }
         }
     },

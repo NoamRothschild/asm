@@ -113,4 +113,149 @@ b64Encode:
   inc edi
   loop .placeEqualSign
   jmp .end
+
+b64UnmapEncoding:
+  push ebp
+  mov ebp, esp
+  push ecx
+  push eax
+  push ebx
+
+  xor ecx, ecx
+
+  mov eax, [ebp + 8] ; character
+  ;push eax
+  ;call printChar
+  mov ebx, b64IndexTable
+.findRepresentor:
+  cmp al, byte [ebx]
+  jz .end
+  inc ecx
+  inc ebx
+  jmp .findRepresentor
+
+.end:
+  and ecx, 0b00000000000000000000000000111111
+  mov dword [ebp + 8], ecx
+  pop ebx
+  pop eax
+  pop ecx
+  pop ebp
+  ret
+
+b64Decode:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push ecx
+  push edx
+  push edi
+
+  mov ebx, [ebp + 8 ]  ; b64 string (end with NULL byte)
+  mov edi, [ebp + 12]  ; output buffer
+
+  ; cl: out byte
+  ; al: in byte
+  ; dl: state ctr
+  xor edx, edx
+  xor ecx, ecx
+  xor eax, eax
+
+.loop:
+  mov al, byte [ebx]
+  cmp al, '='
+  jz .end
+  cmp al, 0 
+  jz .end
+
+  push eax
+  call b64UnmapEncoding
+  pop eax
+
+  cmp dl, 0
+  jz .state0
+  cmp dl, 1
+  jz .state1
+  cmp dl, 2
+  jz .state2
+  cmp dl, 3
+  jz .state3
+
+.state0:
+  shl al, 2
+  or cl, al
+  mov byte [edi], cl
+
+  inc dl
+  inc ebx
+  jmp .loop
+.state1:
+  shr al, 4
+  or cl, al ; first byte cl is now done
+  mov byte [edi], cl
+
+  inc edi
+  xor cl, cl
+
+  mov al, byte [ebx]
+  cmp al, '='
+  jz .end
+  cmp al, 0 
+  jz .end
+  push eax
+  call b64UnmapEncoding
+  pop eax
+
+  shl al, 4
+  or cl, al
+  mov byte [edi], cl
+
+  inc dl
+  inc ebx
+  jmp .loop
+.state2:
+  shr al, 2
+  or cl, al
+  mov byte [edi], cl
+
+  inc edi
+  xor cl, cl
+
+  mov al, byte [ebx]
+  cmp al, '='
+  jz .end
+  cmp al, 0 
+  jz .end
+  push eax
+  call b64UnmapEncoding
+  pop eax
+
+
+  shl al, 6
+  or cl, al
+  mov byte [edi], cl
+
+  inc dl
+  inc ebx
+  jmp .loop
+.state3:
+  or cl, al
+  mov byte [edi], cl
+
+  inc edi
+  
+  xor cl, cl
+  xor dl, dl
+  inc ebx
+  jmp .loop
+
+.end:
+  pop edi
+  pop edx
+  pop ecx
+  pop ebx
+  pop eax
+  pop ebp
+  ret 8
 %endif
