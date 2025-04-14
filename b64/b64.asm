@@ -251,6 +251,7 @@ b64Decode:
   jmp .loop
 
 .end:
+  mov byte [edi], 0
   pop edi
   pop edx
   pop ecx

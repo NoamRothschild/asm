@@ -34,11 +34,11 @@ _start:
   call printMessage
   call printTerminator
 
-  push output2
-  push msgEncoded2
+  push output
+  push output
   call b64Decode
 
-  push output2
+  push output
   call printMessage
   call printTerminator
 
