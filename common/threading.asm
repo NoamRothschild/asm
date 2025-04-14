@@ -7,6 +7,15 @@ section .data
   IPC_PRIVATE equ 0
   IPC_CREAT equ 512
 
+  PROT_READ equ 1
+  PROT_WRITE equ 2
+
+  MAP_ANONYMOUS equ 32
+  MAP_PRIVATE equ 2
+  MAP_SHARED equ 1
+
+  MAP_FAILED equ 0xffffffff
+
 section .bss
   example_buffer: resb 1024
 
@@ -121,9 +130,82 @@ attachSharedMemory:
   pop ebp
   ret
 
+mmap:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push ecx
+  push edx
+  push esi
+  push edi
+
+  push ebp
+
+  mov eax, 0xc0 ; mmap2
+  mov ebx, 0
+  mov ecx, [ebp + 8] ; size of allocated region
+  mov edx, PROT_READ
+  or edx, PROT_WRITE
+  mov esi, MAP_ANONYMOUS
+  or esi, MAP_SHARED
+  mov edi, -1
+  mov ebp, 0
+  int 0x80
+
+  pop ebp
+  mov [ebp + 8], eax
+
+  pop edi
+  pop esi
+  pop edx
+  pop ecx
+  pop ebx
+  pop eax
+  pop ebp
+  ret
+
+munmap:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push ecx
+
+  mov eax, 0x5b       ; munmap
+  mov ebx, [ebp + 8 ] ; addr to umap
+  mov ecx, [ebp + 12] ; size of region to unmap
+  int 0x80
+
+  pop ecx
+  pop ebx
+  pop eax
+  pop ebp
+  ret 8
+
 ; global _start
 ; 
 ; _start:
+;      xor eax, eax
+;      push dword 4096
+;      call mmap
+;      pop eax
+;
+;      push eax
+;      call printInt
+;      call printTerminator
+;      
+;      push dword 4096
+;      push eax
+;      call munmap
+;
+;      mov byte [eax], '5'
+;      mov byte [eax + 1], 0
+;
+;      push eax
+;      call printMessage
+;
+;
 ;     push dword 1024
 ;     call createSharedMemory
 ;     cmp dword [esp], -1 ; shmid or -1

@@ -104,6 +104,16 @@
                 "description": "attaches to a shared memory segment using its ID",
                 "params": ["[#] shared memory ID"],
                 "return": ["[#] pointer to shared memory or -1 on error"]
+            },
+            "mmap": {
+                "description": "creates a new shared memory segment in the given size",
+                "params": ["[#] size in bytes"],
+                "return": ["[&] memory pointer or -1 on error"]
+            },
+            "munmap": {
+                "description": "unmaps a shared memory segment created by mmap",
+                "params": ["[#] size in bytes", "[&] address to unmap"],
+                "return": []
             }
         },
         "string.asm": {
