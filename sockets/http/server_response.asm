@@ -19,6 +19,7 @@ section .data
   STR_CODE_414 db "414 URI Too Long", 0
   STR_CODE_101 db "101 Switching Protocols", 0
   STR_CODE_301 db "301 Moved Permanently", 0
+  STR_CODE_400 db "400 Bad Request", 0
 
   ; file extensions
 
@@ -178,6 +179,8 @@ getResonseCodeStr:
   jz .501
   cmp dword [esp+4], 301
   jz .301
+  cmp dword [esp+4], 400
+  jz .400
   jmp .200
 .101:
   mov dword [esp+4], STR_CODE_101
@@ -196,6 +199,9 @@ getResonseCodeStr:
   ret
 .301:
   mov dword [esp+4], STR_CODE_301
+  ret
+.400:
+  mov dword [esp+4], STR_CODE_400
   ret
 
 ; getMime(fnameExtension*) -> content-type

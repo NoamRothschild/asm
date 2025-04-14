@@ -49,7 +49,7 @@
                 
                 switch (error) {
                     case 'ws_error':
-                        errorMessage.textContent = 'Connection error. Please login again.';
+                        errorMessage.textContent = 'Connection error. Please try again.';
                         break;
                     case 'invalid_credentials':
                         errorMessage.textContent = 'Invalid username or password.';
@@ -65,14 +65,32 @@
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
                 
-                // Here you would typically send the credentials to your server
-                // For now, we'll just simulate a login
-                
-                // Store username in localStorage for the main app
-                localStorage.setItem('username', username);
-                
-                // Redirect to the main app
-                window.location.href = 'index.html';
+                // Send POST request to /login
+                fetch('/login', {
+                    method: 'POST',
+                    body: `${username}\0${password}\0`,
+                    credentials: 'same-origin' // store cookies
+                })
+                .then(response => {
+                    // add given response cookies to document.cookie
+
+                    if (response.ok) {
+                        // Store username in localStorage for the main app
+                        localStorage.setItem('username', username);
+                        
+                        // Redirect to the main app
+                        window.location.href = 'index.html';
+                    } else {
+                        // Show error message
+                        errorMessage.style.display = 'block';
+                        errorMessage.textContent = 'Invalid username or password.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'Connection error. Please try again.';
+                });
             });
         });
     </script>

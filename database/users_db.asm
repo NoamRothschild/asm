@@ -31,6 +31,9 @@ section .data
 
   USR_TOTAL_SIZE equ USR_PROPS_OFFSET + USR_PROPS_SIZE
 
+  USR_ERR_WRONG_PASS equ 0
+  USR_ERR_NOT_FOUND equ USR_ERR_WRONG_PASS + 1
+
 section .text
 
 ; create_users_database(MAX_USER_AMM) -> db*
@@ -236,7 +239,7 @@ get_usr_by_token:
 
   mov eax, [ebp + 8] ; db*
   push eax ; db* 
-  call get_usr_ptr
+  call get_user_count
   pop ecx
 
   cmp ecx, 0
@@ -269,5 +272,88 @@ get_usr_by_token:
   pop eax
   pop ebp
   ret 4
+
+authenticate_usr:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push ecx
+  push edx
+
+  push dword [ebp + 12] ; uname
+  call printMessage
+  call printTerminator
+  push dword [ebp + 16] ; pwd
+  call printMessage
+
+  mov eax, [ebp + 8] ; db*
+
+  push eax ; db* 
+  call get_user_count
+  pop ecx
+
+  add eax, USR_DATA_START_OFFSET
+.nextUser:
+  
+  lea ebx, [eax + USR_NAME_OFFSET]
+
+  push dword [ebp + 12] ; uname*
+  push ebx
+  call strcmp 
+  pop edx
+  cmp edx, 1 ; equal?
+  jz .foundUser
+
+  add eax, USR_TOTAL_SIZE
+  loop .nextUser
+
+.fail:
+  mov dword [ebp + 16], USR_ERR_NOT_FOUND
+  jmp .end
+.foundUser:
+
+  sub esp, USR_PWD_SIZE
+  mov edx, esp 
+
+  lea ebx, [eax + USR_PWD_OFFSET]
+
+  push edx
+  push dword [ebp + 16] ; password
+  push dword [ebp + 16]
+  call igetLength       ; get password length
+  call sha1
+
+  push edx ; pwd*
+  push ebx
+  call strcmp
+  pop edx
+
+  add esp, USR_PWD_SIZE
+
+  cmp edx, 1 ; equal?
+  jz .authenticate
+
+  mov dword [ebp + 16], USR_ERR_WRONG_PASS
+  jmp .end
+
+.authenticate:
+  
+  xor edx, edx
+  mov dl, [eax + USR_ID_OFFSET]
+  push edx             ; usr id
+  push dword [ebp + 8] ; db*
+  call create_token
+
+  lea edx, [eax + USR_TOKEN_OFFSET]
+  mov dword [ebp + 16], edx
+
+.end:
+  pop edx
+  pop ecx
+  pop ebx
+  pop eax
+  pop ebp
+  ret 8
 
 %endif

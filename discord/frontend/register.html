@@ -83,14 +83,43 @@
                     return;
                 }
                 
-                // Here you would typically send the registration data to your server
-                // For now, we'll just simulate a successful registration
-                
-                // Store username in localStorage for the main app
-                localStorage.setItem('username', username);
-                
-                // Redirect to the main app
-                window.location.href = 'index.html';
+                // Send POST request to /register
+                fetch('/register', {
+                    method: 'POST',
+                    body: `${username}\0${password}\0`,
+                    credentials: 'same-origin' // store cookies
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Store username in localStorage for the main app
+                        localStorage.setItem('username', username);
+                        
+                        // Redirect to the main app
+                        window.location.href = 'index.html';
+                    } else {
+                        // Show error message
+                        errorMessage.style.display = 'block';
+                        errorMessage.textContent = 'Registration failed. Please try again.';
+                        
+                        /*
+                        // Try to get more specific error message from response
+                        response.text().then(text => {
+                            if (text.includes('username_taken')) {
+                                errorMessage.textContent = 'Username is already taken.';
+                            } else {
+                                errorMessage.textContent = 'Registration failed. Please try again.';
+                            }
+                        }).catch(() => {
+                            errorMessage.textContent = 'Registration failed. Please try again.';
+                        });
+                        */
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = 'Connection error. Please try again.';
+                });
             });
         });
     </script>
