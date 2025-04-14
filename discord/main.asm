@@ -20,7 +20,6 @@ section .data
 
   base_path db "frontend", 0
   traceback_file db "frontend/404.html", 0
-  homepage_file db "frontend/login.html", 0
   login_route db "frontend/login", 0
   register_route db "frontend/register", 0
   login_page db "frontend/login.html", 0
@@ -146,7 +145,7 @@ _start:
   jz .paths_http
   
   push http_request_struct + REQ_PATH_OFFSET + 1
-  push homepage_file
+  push main_page
   call strcpy
   add esp, 4
 
@@ -162,8 +161,8 @@ _start:
   push dword register_route
   call .path_subroutine
 
-  push dword .login_page
-  push dword login_page
+  push dword .index_page
+  push dword main_page
   call .path_subroutine
 
   jmp .respond_http
@@ -270,8 +269,7 @@ _start:
   sub esp, 27
   mov edi, esp
 
-  push edx
-  call igetLength
+  push USR_PWD_SIZE
   push edi
   push edx
   call b64Encode
@@ -290,8 +288,12 @@ _start:
 
   jmp .write_http
 
-.login_page:
- 
+.index_page:
+
+  push http_request_struct + REQ_PATH_OFFSET + 1
+  push login_page
+  call strcpy
+
   mov ebx, http_request_data
 .nextHeader:
   mov edx, dword [DATA_START] ; \r\n
