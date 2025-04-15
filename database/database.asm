@@ -4,6 +4,7 @@
 %include "../common/threading.asm"
 %include "../common/debug.asm"
 %include "../common/string.asm"
+%include "../common/time.asm"
 
 section .data
   LOCKED_BYTE_OFFSET equ 0
@@ -18,6 +19,10 @@ create_database:
   mov ebp, esp
   push edx
 
+  mov edx, [ebp+4] ; old IP
+  push dword 0
+  call unixNow
+  xor [esp], edx ; generating a key based on the IP before call and unixNow
   push dword [ebp+8] ; allocated size
   call createSharedMemory
   pop edx ; shmid

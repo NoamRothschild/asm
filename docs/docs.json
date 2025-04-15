@@ -97,7 +97,7 @@
             },
             "createSharedMemory": {
                 "description": "creates a shared memory segment with specified size",
-                "params": ["[#] size in bytes"],
+                "params": ["[#] shared memory key", "[#] size in bytes"],
                 "return": ["[#] shared memory ID or -1 on error"]
             },
             "attachSharedMemory": {

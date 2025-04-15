@@ -68,9 +68,7 @@ createSharedMemory:
   push edx
   push esi
 
-  push dword 0
-  call unixNow ; generate a uniuqe key value 
-  pop ecx
+  mov ecx, [ebp+12] ; key
 
   mov eax, 0x75 ; ipc
   mov ebx, 23 ; SHMGET
@@ -86,14 +84,14 @@ createSharedMemory:
   push strUnableToAllocateSHMGET
   call printColored
 .end:
-  mov dword [ebp+8], eax ; shmid or -1
+  mov dword [ebp+12], eax ; shmid or -1
   pop esi
   pop edx
   pop ecx
   pop ebx
   pop eax
   pop ebp
-  ret
+  ret 4
 
 strUnableToAttachSHMAT: db "Unable to attach to shared memory using shmat.", 10, 0
 attachSharedMemory:

@@ -5,6 +5,7 @@
 %include 'sockets.asm'
 %include 'http/http.asm'
 %include 'http/websocket.asm'
+%include '../common/time.asm'
 section .data
   tracebackFile db "temporary/index.html", 0
   basePath db 'resources', 0
@@ -28,7 +29,9 @@ _start:
 
   ; loading heightmap & colormap into memory for game
   ; call init_files
-
+  
+  push dword 0
+  call unixNow
   push dword PLAYERS_BUFFER_SIZE
   call createSharedMemory
   pop edx
