@@ -111,6 +111,12 @@ class ChannelWebSocket {
             return;
         }
         
+        // Clear all messages from the current channel
+        const messagesContainer = document.querySelector('.messages-container');
+        if (messagesContainer) {
+            messagesContainer.innerHTML = '';
+        }
+        
         this.disconnect();
         this.currentChannel = channelName;
         this.connect();

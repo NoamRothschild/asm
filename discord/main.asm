@@ -33,6 +33,8 @@ section .data
 
   ws_channel_general db "frontend/channels/general", 0
   ws_channel_help db "frontend/channels/help", 0
+  ws_channel_about db "frontend/channels/about-this-project", 0
+  ws_channel_announcements db "frontend/channels/announcements", 0
 
   tmp_valid_usr db "user valid!", 10, 0
   tmp_invalid_usr db "authentication failed!", 10, 0
@@ -46,6 +48,10 @@ section .data
 section .bss
   users_db: resd 1
   channel_general_db: resd 1
+  channel_help_db: resd 1
+  channel_about_db: resd 1
+  channel_announcements_db: resd 1
+
   connected_channel: resd 1 ; a ptr to the value of channel_general / channel_...
   connected_user: resd 1 ; the sessions user (for websocket send)
   connected_last_read: resb 1 ; a ptr inside connected_channel of the last read message
@@ -103,6 +109,27 @@ _start:
   cmp edi, -1
   jz .end
   mov dword [channel_general_db], edi
+
+  push dword CHANNEL_BUFF_CAPACITY
+  call create_database
+  pop edi
+  cmp edi, -1
+  jz .end
+  mov dword [channel_help_db], edi
+
+  push dword CHANNEL_BUFF_CAPACITY
+  call create_database
+  pop edi
+  cmp edi, -1
+  jz .end
+  mov dword [channel_announcements_db], edi
+
+  push dword CHANNEL_BUFF_CAPACITY
+  call create_database
+  pop edi
+  cmp edi, -1
+  jz .end
+  mov dword [channel_about_db], edi
 
   ; creating a temporary user
   push dword 0
@@ -190,6 +217,18 @@ _start:
 
   push dword [channel_general_db]
   push dword ws_channel_general
+  call .ws_subroutine
+
+  push dword [channel_help_db]
+  push dword ws_channel_help
+  call .ws_subroutine
+
+  push dword [channel_announcements_db]
+  push dword ws_channel_announcements
+  call .ws_subroutine
+
+  push dword [channel_about_db]
+  push dword ws_channel_about
   call .ws_subroutine
 
 .unknown_path:
