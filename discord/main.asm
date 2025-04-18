@@ -43,8 +43,9 @@ section .data
 
 section .bss
   users_db: resd 1
-  channel_general: resd 1
+  channel_general_db: resd 1
   connected_channel: resd 1 ; a ptr to the value of channel_general / channel_...
+  connected_user: resd 1 ; the sessions user (for websocket send)
   logs_file_fd: resd 1
 
   logs_file_name: resb 25
@@ -96,7 +97,7 @@ _start:
   pop edi
   cmp edi, -1
   jz .end
-  mov dword [channel_general], edi
+  mov dword [channel_general_db], edi
 
   ; creating a temporary user
   push dword 0
@@ -180,10 +181,11 @@ _start:
   pop edx
   cmp edx, 0
   jz .unknown_path ; TODO: CHANGE TO 403 Unauthorized.
+  mov dword [connected_user], edx
 
-  push dword .channel_general
+  push dword channel_general_db
   push dword ws_channel_general
-  call .path_subroutine
+  call .ws_subroutine
 
 .unknown_path:
   mov word [http_request_struct + REQ_RESP_CODE_OFFSET], 404
@@ -208,7 +210,23 @@ _start:
 .end_paths_subroutine:
   jmp dword [esp - 4]    ; ret replacement without removing IP from stack (already did)
 
+.ws_subroutine: ; +8 str path, +12 channel db
+  push ebp
+  mov ebp, esp
+  push dword .ws_succed_subroutine
+  push dword [ebp + 8] ; str path
+  call .path_subroutine
+.ws_fail_subroutine:
+  mov esp, ebp
+  pop ebp
+  ret 8
+.ws_succed_subroutine:
+  mov edx, [ebp + 12] ; channel db
+  mov [connected_channel], edx
+  pop ebp
+  add esp, 12 ; clear args & IP
   jmp .respond_http
+
 .login:
   lea eax, [http_request_struct + REQ_DATA_OFFSET]
 
@@ -340,11 +358,6 @@ _start:
 
   jmp .respond_http
 
-.channel_general:  
-  mov edx, [channel_general]
-  mov [connected_channel], edx
-  jmp .respond_http
-
 .respond_http:
   push traceback_file
   push http_request_struct
@@ -416,7 +429,7 @@ create_dbs_merged:
   mov byte [edi + USR_DATA_START_OFFSET + USR_ID_OFFSET], 255
   add edi, (USER_CAPACITY * USR_TOTAL_SIZE) + 1
 
-  mov dword [channel_general], edi
+  mov dword [channel_general_db], edi
   lea eax, [edi + DATA_START_OFFSET]
   mov byte  [edi + LOCKED_BYTE_OFFSET], 0     ; setting locked to false
   mov dword [edi + TAIL_PTR_OFFSET   ], eax   ; setting tail  ptr to first element
