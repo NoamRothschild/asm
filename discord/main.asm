@@ -48,6 +48,7 @@ section .bss
   channel_general_db: resd 1
   connected_channel: resd 1 ; a ptr to the value of channel_general / channel_...
   connected_user: resd 1 ; the sessions user (for websocket send)
+  connected_last_read: resb 1 ; a ptr inside connected_channel of the last read message
   logs_file_fd: resd 1
 
   logs_file_name: resb 25
@@ -225,6 +226,8 @@ _start:
   ret 8
 .ws_succed_subroutine:
   mov edx, [ebp + 12] ; channel db
+  mov dword [connected_last_read], edx
+  add dword [connected_last_read], DATA_START_OFFSET
   mov [connected_channel], edx
   pop ebp
   add esp, 12 ; clear args & IP
@@ -391,20 +394,39 @@ _start:
   cmp ecx, -1 ; close socket if closed by client
   jz .ws_disconnect
   cmp ecx, 1 ; only parse if data was found
-  jnz .ws_send
+  jnz .ws_send_recent
 .ws_parse:
   push read_store_data ; the call function
   push esi
   call parseRequest
-  pop ecx
-.ws_send:
+  add esp, 4
+.ws_send_recent:
+  mov edi, [connected_last_read]
+.ws_send_recent_loop:
+  cmp dword [edi], 0
+  jz .ws_send_recent_end
+  ; handle new message
+  mov ecx, [edi]
+  sub ecx, edi
+  sub ecx, 4 ; getting message length
+  
   push ecx
+  push edi
+  add dword [esp], 4
+  call makeResponse
+  ; pop ecx
+  ; push ecx
   push esi
   push wsRespBuff
   call writeSocket
+
+  mov edi, [edi]
+  jmp .ws_send_recent_loop
+.ws_send_recent_end:
+  mov [connected_last_read], edi
   jmp .websocket
 .ws_disconnect:
-  ; call removePlayer
+
 .closeSocket:
   push esi
   call closeSocket
