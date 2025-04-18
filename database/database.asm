@@ -63,7 +63,7 @@ create_database:
   pop ebp
   ret
 
-; ebp+8 - data*, ebp+12 - database*
+; +8 db*, +12 data*, +16 len
 append_data:
   push ebp
   mov ebp, esp
@@ -71,7 +71,7 @@ append_data:
   push esi
   push edi
 
-  mov ebx, [ebp+12] ; database*
+  mov ebx, [ebp + 8] ; database*
 .waitUnlocked:
   cmp byte [ebx + LOCKED_BYTE_OFFSET], 0
   jnz .waitUnlocked
@@ -87,8 +87,9 @@ append_data:
 .copyData:
   lea esi, [edi + 4] ; start of data
   push esi
-  push dword [ebp+8] ; data*
-  call strcpy
+  push dword [ebp + 12] ; data*
+  push dword [ebp + 16] ; len
+  call memcpy
   pop esi
   inc esi
   mov dword [esi], 0 ; setting next to null
@@ -101,6 +102,6 @@ append_data:
   pop esi
   pop ebx
   pop ebp
-  ret 8
+  ret 12
 
 %endif

@@ -17,6 +17,8 @@ section .data
   CHANNEL_BUFF_CAPACITY equ 10 * (1024 * 1024) ; 10 MB
   REQUEST_READ_BYTES equ 4096
   CHANNEL_AMOUNT equ 1
+
+  MAX_WEBSOCKET_DATA_SIZE equ (2 * WS_MAX_VALUE_UNSIGNED_16BIT) + (USR_NAME_SIZE + 1) + 4
   
   AUTH_TEMPLATE db 'HTTP/1.1 %', 0Dh, 0Ah, 'Connection: close', 0Dh, 0Ah, 'Set-Cookie: token=%', 0Dh, 0Ah, 0Dh, 0Ah, 0
 
@@ -51,6 +53,7 @@ section .bss
   logs_file_name: resb 25
   http_request_data: resb REQUEST_READ_BYTES
   http_request_struct: resb REQ_TOTAL_SIZE
+  websocket_data: resb MAX_WEBSOCKET_DATA_SIZE
 
 section .text
 global _start
@@ -183,7 +186,7 @@ _start:
   jz .unknown_path ; TODO: CHANGE TO 403 Unauthorized.
   mov dword [connected_user], edx
 
-  push dword channel_general_db
+  push dword [channel_general_db]
   push dword ws_channel_general
   call .ws_subroutine
 
@@ -372,11 +375,11 @@ _start:
 
   cmp word [http_request_struct + REQ_RESP_CODE_OFFSET], 101
   jnz .closeSocket
-  ; call registerPlayer
+
   push esi
   call setNonBlocking
 
-  ; making any error on ws force disconnect player.
+  ; making any error on ws force close socket.
   mov ecx, .ws_disconnect
   mov ebx, 11 ; seg fault
   mov eax, 0x30 ; SYS_SIGNAL
@@ -385,17 +388,16 @@ _start:
   push esi
   call hasData
   pop ecx
-  cmp ecx, -1 ; close socket and free player slot if socket closed by client
+  cmp ecx, -1 ; close socket if closed by client
   jz .ws_disconnect
   cmp ecx, 1 ; only parse if data was found
   jnz .ws_send
 .ws_parse:
-  push dword _return
+  push read_store_data ; the call function
   push esi
   call parseRequest
-  add esp, 4
+  pop ecx
 .ws_send:
-  ; call voxelSpaceResponse
   push ecx
   push esi
   push wsRespBuff
@@ -408,6 +410,60 @@ _start:
   call closeSocket
 .end:
   call exit
+
+; push ecx
+; push websocket_data
+; call makeResponse
+; pop ecx
+
+read_store_data:
+  push eax
+  push esi
+  ; @edi: length
+  ; @wsReqData: data
+
+  mov esi, websocket_data
+  mov eax, [connected_user]
+  lea ebx, [eax + USR_NAME_OFFSET]
+  push ebx
+  call igetLength
+  push dword [esp] ; keep a save of the uname length in stack
+  pop ecx ; uname length
+  add ecx, edi ; msg length
+  add ecx, 4 ; unix timestamp
+
+  ; copying unix time
+  push dword 0
+  call unixNow
+  pop edx
+  mov [esi], edx
+  add esi, 4
+  pop edx ; uname length
+
+  ; copying username
+  push esi ; dest buffer
+  push ebx ; uname
+  push edx ; uname length
+  call memcpy
+  pop esi
+  mov byte [esi], 0
+  inc esi
+ 
+  push esi ; dest buffer
+  push wsReqData ; data
+  push edi ; data length
+  call memcpy
+  add esp, 4
+
+  push ecx
+  push websocket_data
+  push dword [connected_channel]
+  call append_data
+
+  ; @ecx: return
+  pop esi
+  pop eax
+  ret
 
 create_dbs_merged:
   push dword [esp]

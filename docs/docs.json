@@ -405,7 +405,7 @@
             },
             "append_data": {
                 "description": "appends data to the end of the database's linked list",
-                "params": ["[&] database pointer", "[&] data pointer"],
+                "params": ["[#] data length", "[&] data pointer", "[&] database pointer"],
                 "return": []
             }
         },
