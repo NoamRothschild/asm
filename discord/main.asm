@@ -10,11 +10,13 @@
 %include "../common/string.asm"
 %include "../common/time.asm"
 %include "../b64/b64.asm"
+%include "auth.asm"
 
 section .data
   USER_CAPACITY equ 50
-  CHANNEL_BUFF_CAPACITY equ 10 * (1024 * 1024) / 1024 ; 10 MB
+  CHANNEL_BUFF_CAPACITY equ 10 * (1024 * 1024) ; 10 MB
   REQUEST_READ_BYTES equ 4096
+  CHANNEL_AMOUNT equ 1
   
   AUTH_TEMPLATE db 'HTTP/1.1 %', 0Dh, 0Ah, 'Connection: close', 0Dh, 0Ah, 'Set-Cookie: token=%', 0Dh, 0Ah, 0Dh, 0Ah, 0
 
@@ -27,7 +29,8 @@ section .data
   main_page db "frontend/index.html", 0
   empty_str_ db " ", 0
 
-  cookie_header db "Cookie: token=", 0
+  ws_channel_general db "frontend/channels/general", 0
+  ws_channel_help db "frontend/channels/help", 0
 
   tmp_valid_usr db "user valid!", 10, 0
   tmp_invalid_usr db "authentication failed!", 10, 0
@@ -41,6 +44,7 @@ section .data
 section .bss
   users_db: resd 1
   channel_general: resd 1
+  connected_channel: resd 1 ; a ptr to the value of channel_general / channel_...
   logs_file_fd: resd 1
 
   logs_file_name: resb 25
@@ -98,7 +102,7 @@ _start:
   push dword 0
   push tmp_pwd
   push tmp_uname
-  push edi
+  push dword [users_db]
   call create_user
   add esp, 4
 
@@ -165,6 +169,25 @@ _start:
   push dword main_page
   call .path_subroutine
 
+  cmp word [http_request_struct + REQ_RESP_CODE_OFFSET], 101
+  ; jnz .unknown_path
+  jnz .respond_http
+  ; websocket paths
+  
+  push dword [users_db]
+  push http_request_data 
+  call is_request_authenticated
+  pop edx
+  cmp edx, 0
+  jz .unknown_path ; TODO: CHANGE TO 403 Unauthorized.
+
+  push dword .channel_general
+  push dword ws_channel_general
+  call .path_subroutine
+
+.unknown_path:
+  mov word [http_request_struct + REQ_RESP_CODE_OFFSET], 404
+  ; do not accept socket connection for an unknown path
   jmp .respond_http
 
 .path_subroutine:
@@ -294,62 +317,10 @@ _start:
   push login_page
   call strcpy
 
-  mov ebx, http_request_data
-.nextHeader:
-  mov edx, dword [DATA_START] ; \r\n
-  inc ebx
-  cmp word [ebx], dx
-  jnz .nextHeader
-  cmp dword [ebx], edx
-  jz .respond_http
-  add ebx, 2
-
-  push ebx
-  push cookie_header
-  call startswith 
+  push dword [users_db]
+  push http_request_data 
+  call is_request_authenticated
   pop edx
-  
-  cmp edx, 1
-  jnz .nextHeader
-.validateCookie:
-
-  mov eax, ebx
-  push cookie_header
-  call igetLength
-  add eax, [esp]
-  add esp, 4
-  
-  push edi
-  push ecx
-  mov ecx, 30
-  sub esp, ecx
-  mov edi, esp
-  push edi
-.copyCookie:
-  mov dl, byte [eax]
-  cmp dl, 0xD
-  jz .endCopyCookie
-  mov byte [edi], dl
-  inc eax
-  inc edi
-
-  loop .copyCookie
-.endCopyCookie:
-  mov byte [edi], 0
-  pop edi
-
-  push edi
-  push edi
-  call b64Decode
-
-  push edi
-  push dword [users_db] 
-  call get_usr_by_token
-  pop edx
-
-  add esp, 30
-  pop ecx
-  pop edi
 
   cmp edx, 0
   jz .respond_http
@@ -367,6 +338,11 @@ _start:
 
   call resetDefaultColor
 
+  jmp .respond_http
+
+.channel_general:  
+  mov edx, [channel_general]
+  mov [connected_channel], edx
   jmp .respond_http
 
 .respond_http:
@@ -419,3 +395,40 @@ _start:
   call closeSocket
 .end:
   call exit
+
+create_dbs_merged:
+  push dword [esp]
+  push ebp
+  mov ebp, esp
+  push eax
+  push edi
+
+  mov eax, (USER_CAPACITY * USR_TOTAL_SIZE) + 1
+  add eax, CHANNEL_BUFF_CAPACITY * CHANNEL_AMOUNT
+
+  push eax
+  call create_database
+  pop edi
+  cmp edi, -1
+  jz .fail
+
+  mov dword [users_db], edi
+  mov byte [edi + USR_DATA_START_OFFSET + USR_ID_OFFSET], 255
+  add edi, (USER_CAPACITY * USR_TOTAL_SIZE) + 1
+
+  mov dword [channel_general], edi
+  lea eax, [edi + DATA_START_OFFSET]
+  mov byte  [edi + LOCKED_BYTE_OFFSET], 0     ; setting locked to false
+  mov dword [edi + TAIL_PTR_OFFSET   ], eax   ; setting tail  ptr to first element
+  mov dword [edi + DATA_START_OFFSET ], 0     ; setting first ptr to NULL
+  add edi, CHANNEL_BUFF_CAPACITY
+  
+  jmp .end
+.fail:
+  call exit
+.end:
+  mov [ebp + 8], edi
+  pop edi
+  pop eax
+  pop ebp
+  ret

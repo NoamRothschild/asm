@@ -85,7 +85,7 @@ class ChannelWebSocket {
                 };
                 
                 this.socket.onerror = (error) => {
-                    window.location.href = '/login.html';
+                    //window.location.href = '/login.html';
 
                     console.error(`WebSocket error to ${this.currentChannel}:`, error);
                     this.connectionStatus = 'error';

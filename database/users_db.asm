@@ -49,6 +49,7 @@ create_users_database:
   mov ebx, USR_TOTAL_SIZE
   mul ebx
 
+  add eax, USR_DATA_START_OFFSET
   push eax
   call create_database
   pop ebx
