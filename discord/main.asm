@@ -60,6 +60,7 @@ section .text
 global _start
 
 str_started: db "Server binded up successfully to http://localhost:8000", 10, 0
+str_client_disconnected: db "Client disconnected from server.", 10, 0
 
 _start:
   ; creating a log file
@@ -399,7 +400,9 @@ _start:
   push read_store_data ; the call function
   push esi
   call parseRequest
-  add esp, 4
+  pop ecx
+  cmp ecx, -1
+  jz .ws_disconnect
 .ws_send_recent:
   mov edi, [connected_last_read]
 .ws_send_recent_loop:
@@ -426,7 +429,11 @@ _start:
   mov [connected_last_read], edi
   jmp .websocket
 .ws_disconnect:
+  push ANSI_YELLOW
+  push str_client_disconnected
+  call printColored
 
+  ; TODO: send close frame
 .closeSocket:
   push esi
   call closeSocket

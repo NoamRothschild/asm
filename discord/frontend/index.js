@@ -67,16 +67,6 @@ function sendMessage() {
         if (window.channelWebSocket) {
             window.channelWebSocket.sendMessage(text);
         } 
-        // Fallback to local display if WebSocket is not connected
-        const now = new Date();
-        const hours = now.getHours();
-        const minutes = now.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const formattedHours = hours % 12 || 12;
-        
-        const date = `Today at ${formattedHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-        
-        window.addMessage('You', text, date);    
         messageInput.value = '';
         messageInput.style.height = 'auto';
     }

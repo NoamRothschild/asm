@@ -208,6 +208,19 @@ parseRequest:
   push wsHeaders
   call readSocket
   
+  ; push ANSI_GREEN
+  ; call setDefaultColor
+  ; push dword 1
+  ; push dword wsHeaders
+  ; call printBin
+  ; call printTerminator
+  ; call resetDefaultColor
+
+  mov bl, byte [wsHeaders]
+  and bl, 0b00001111 ; removing fin bit
+  cmp bl, 0x8
+  jz .wsDisconnected
+  
   xor edx, edx
   mov bl, byte [wsHeaders+WS_PAYLOAD_OFFSET]
   and bl, 0b01111111 ; removing the mask indicator bit from payload len byte
@@ -279,6 +292,8 @@ parseRequest:
   call dword [ebp+12] ; calling the given callback
   mov dword [ebp+12], ecx ; return the response length
   jmp .end
+.wsDisconnected:
+  mov dword [ebp+12], -1
 .end:
   pop edx
   pop edi
