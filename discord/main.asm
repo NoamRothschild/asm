@@ -291,8 +291,14 @@ _start:
   call printTerminator
 
   mov ebx, STR_CODE_200
+
   cmp edx, USR_ERR_NOT_FOUND
-  ja .login_createResponse  ; jumps here if valid
+  jz .login_invalidResponse
+  cmp edx, USR_ERR_WRONG_PASS
+  jz .login_invalidResponse
+
+  jmp .login_createResponse
+.login_invalidResponse:
   mov ebx, STR_CODE_400
   mov edx, empty_str_
 .login_createResponse:
@@ -301,8 +307,7 @@ _start:
   sub esp, 27
   mov edi, esp
 
-  push edx
-  call igetLength
+  push dword USR_PWD_SIZE
   push edi
   push edx
   call b64Encode

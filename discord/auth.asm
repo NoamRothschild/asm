@@ -3,7 +3,9 @@
 %include "../b64/b64.asm"
 
 section .data
-  cookie_header db "Cookie: token=", 0
+  ; cookie_header db "Cookie: token=", 0
+  cookie_header db "Cookie: ", 0
+  lookup_cookie db "token=",0
 
 section .text
 
@@ -30,15 +32,44 @@ is_request_authenticated:
 
   push ebx
   push cookie_header
-  call startswith 
+  call startswith
   pop edx
   
   cmp edx, 1
   jnz .nextHeader
-.validateCookie:
+  ; found the cookie header, find the 'token' cookie
 
-  mov eax, ebx
+  ; go to the start of the cookies
   push cookie_header
+  call igetLength
+  add ebx, [esp]
+  add esp, 4
+
+.loopCookies:
+  ; checking if found cookie is the correct one
+  push ebx
+  push lookup_cookie
+  call startswith
+  pop edx
+
+  cmp edx, 1
+  jz .validateCookie
+  mov edx, dword [DATA_START] ; \r\n
+.reachNextCookie:
+  inc ebx
+
+  cmp word [ebx], dx
+  jz .fail
+
+  cmp byte [ebx - 1], ";"
+  jnz .reachNextCookie
+
+  inc ebx
+  jmp .loopCookies
+
+.validateCookie:
+  mov eax, ebx
+  push lookup_cookie
   call igetLength
   add eax, [esp]
   add esp, 4
