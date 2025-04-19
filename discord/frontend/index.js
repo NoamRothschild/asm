@@ -2,6 +2,15 @@ import { ChannelWebSocket, getCurrentChannel, updateChannelBar, channelNameToURI
 
 window.channelWebSocket = new ChannelWebSocket();
 
+// Update profile name from localStorage
+document.addEventListener('DOMContentLoaded', () => {
+    const profileName = document.getElementById('profile-name');
+    const username = localStorage.getItem('username');
+    if (username) {
+        profileName.textContent = username;
+    }
+});
+
 /**
  * Sanitizes a string to prevent XSS attacks
  * @param {string} string - The string to sanitize
