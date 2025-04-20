@@ -9,7 +9,118 @@ document.addEventListener('DOMContentLoaded', () => {
     if (username) {
         profileName.textContent = username;
     }
+    
+    // Initialize profile picture upload functionality
+    initProfilePictureUpload();
 });
+
+/**
+ * Initialize profile picture upload functionality
+ */
+async function initProfilePictureUpload() {
+    const profilePicture = document.getElementById('profile-picture');
+    const profilePictureContainer = document.querySelector('.profile-picture-container');
+    const uploadModal = document.getElementById('upload-modal');
+    const uploadArea = document.getElementById('upload-area');
+    const uploadButton = document.getElementById('upload-button');
+    const fileInput = document.getElementById('file-input');
+    const errorMessage = document.getElementById('error-message');
+    
+    // Open modal when clicking on profile picture
+    profilePictureContainer.addEventListener('click', () => {
+        uploadModal.style.display = 'flex';
+    });
+    
+    // Close modal when clicking outside the modal content
+    uploadModal.addEventListener('click', (e) => {
+        if (e.target === uploadModal) {
+            uploadModal.style.display = 'none';
+            errorMessage.style.display = 'none';
+        }
+    });
+    
+    // Handle file selection via button
+    uploadButton.addEventListener('click', () => {
+        fileInput.click();
+    });
+    
+    // Handle file selection
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileUpload(e.target.files[0]);
+        }
+    });
+    
+    // Handle drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        if (e.dataTransfer.files.length > 0) {
+            handleFileUpload(e.dataTransfer.files[0]);
+        }
+    });
+    
+    /**
+     * Handle file upload
+     * @param {File} file - The file to upload
+     */
+    async function handleFileUpload(file) {
+        // Check if file is a PNG
+        if (file.type !== 'image/png') {
+            errorMessage.textContent = 'Please upload a PNG file';
+            errorMessage.style.display = 'block';
+            return;
+        }
+        
+        try {
+            // Read file as ArrayBuffer (raw binary data)
+            const arrayBuffer = await file.arrayBuffer();
+
+            if (arrayBuffer.byteLength > 1024 * 1024 * 0.85) {
+                errorMessage.textContent = 'File size must be less than 85% of 1MB';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Send raw binary data to server
+            const response = await fetch('/profiles/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/octet-stream'
+                },
+                body: arrayBuffer
+            });
+            
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+            
+            // Update profile picture
+            profilePicture.src = `profiles/${localStorage.getItem('username')}.png`;
+            
+            // Close modal
+            uploadModal.style.display = 'none';
+            
+            // Refresh page
+            window.location.reload();
+        } catch (error) {
+            // Show error message
+            errorMessage.textContent = 'Failed to upload profile picture. Please try again.';
+            errorMessage.style.display = 'block';
+            console.error('Upload error:', error);
+        }
+    }
+}
 
 /**
  * Sanitizes a string to prevent XSS attacks
@@ -32,11 +143,11 @@ function sanitize(string) {
 }
   
 
-window.addMessage = function(username, text, date, profilePicture = 'logo.svg') {
+window.addMessage = function(username, text, date) {
     username = sanitize(username);
     text = sanitize(text);
     date = sanitize(date);
-    profilePicture = sanitize(profilePicture);
+    const profilePicture = `profiles/${username}.png`;
 
     const messagesContainer = document.querySelector('.messages-container');
     
@@ -52,7 +163,7 @@ window.addMessage = function(username, text, date, profilePicture = 'logo.svg') 
     });
     
     messageElement.innerHTML = `
-        <img src="${profilePicture}" alt="profile" class="message-profile-picture">
+        <img src="${profilePicture}" onerror="this.onerror=null; this.src='logo.svg'" alt="profile" class="message-profile-picture">
         <div class="message-content">
             <div class="message-header">
                 <span class="message-username">${username}</span>

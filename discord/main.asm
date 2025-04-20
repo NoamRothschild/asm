@@ -15,7 +15,7 @@
 section .data
   USER_CAPACITY equ 50
   CHANNEL_BUFF_CAPACITY equ 10 * (1024 * 1024) ; 10 MB
-  REQUEST_READ_BYTES equ 4096
+  REQUEST_READ_BYTES equ 1024 * 1024 
   CHANNEL_AMOUNT equ 1
 
   MAX_WEBSOCKET_DATA_SIZE equ (2 * WS_MAX_VALUE_UNSIGNED_16BIT) + (USR_NAME_SIZE + 1) + 4
@@ -29,6 +29,11 @@ section .data
   login_page db "frontend/login.html", 0
   register_page db "frontend/register.html", 0
   main_page db "frontend/index.html", 0
+  profile_upload_page db "frontend/profiles/upload", 0
+  profile_icons_directory db "frontend/profiles/", 0
+  profile_file_extension db ".png", 0
+  
+  json_ok_page db "frontend/ok.json", 0
   empty_str_ db " ", 0
 
   ws_channel_general db "frontend/channels/general", 0
@@ -190,6 +195,10 @@ _start:
   push http_request_struct 
   call printReqFormatted
 
+  push dword .upload_profile
+  push dword profile_upload_page
+  call .path_subroutine
+
   push dword .login
   push dword login_route
   call .path_subroutine
@@ -273,6 +282,53 @@ _start:
   add esp, 12 ; clear args & IP
   jmp .respond_http
 
+.upload_profile:
+  push dword [users_db]
+  push http_request_data 
+  call is_request_authenticated
+  pop edx
+
+  cmp edx, 0
+  jz .respond_http ; return 404 since path is not a valid file
+  ; usr was found in db
+  lea edx, [edx + USR_NAME_OFFSET]
+ 
+  push profile_icons_directory
+  call igetLength
+  pop ecx
+  add ecx, USR_NAME_SIZE
+  sub esp, ecx
+  mov edi, esp 
+
+  push ecx ; keeping a reference to how many bytes to deallocate
+  push edi ; keeping a reference to the start of the file name
+  
+  push edi 
+  push profile_icons_directory
+  call strcpy
+  push edx
+  call strcpy
+  push profile_file_extension
+  call strcpy
+  add esp, 4
+
+  call newFile ; file name already in stack from old reference
+  pop ebx
+  push http_request_data
+  call getReqDataPtr
+  pop ecx
+  mov edx, [http_request_struct + REQ_CONTENT_LENGTH_OFFSET]
+  mov eax, 4 ; invokes SYS_WRITE (kernel opcode 4)
+  int 80h
+
+  pop ecx
+  add esp, ecx
+
+  push http_request_struct + REQ_PATH_OFFSET + 1
+  push json_ok_page
+  call strcpy
+  
+  jmp .respond_http
 .login:
   lea eax, [http_request_struct + REQ_DATA_OFFSET]
 

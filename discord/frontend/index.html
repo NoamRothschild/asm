@@ -39,7 +39,22 @@
     </div>
 
     <div class="profile-container">
-        <img src="logo.svg" alt="profile" class="profile-picture">
+        <div class="profile-picture-container">
+            <img src="logo.svg" alt="profile" class="profile-picture" id="profile-picture">
+            <script>
+                const profilePic = document.getElementById('profile-picture');
+                profilePic.src = `profiles/${localStorage.getItem('username')}.png`;
+                profilePic.onerror = function() {
+                    this.onerror = null;
+                    this.src = 'logo.svg';
+                };
+            </script>
+            <div class="profile-picture-overlay">
+                <svg class="upload-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z" fill="white"/>
+                </svg>
+            </div>
+        </div>
         <div class="profile-info">
             <div class="profile-name" id="profile-name">
                 John Doe
@@ -47,6 +62,20 @@
             <div class="profile-status">
                 Online
             </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="upload-modal">
+        <div class="modal-content">
+            <h3 style="color: #dcddde; margin-top: 0;">Change Profile Picture</h3>
+            <div class="upload-area" id="upload-area">
+                <div class="upload-text">Drag and drop a PNG file here</div>
+                <div class="upload-text">or</div>
+                <button class="upload-button" id="upload-button">Browse Files</button>
+                <input type="file" id="file-input" accept=".png" style="display: none;">
+            </div>
+            <div class="error-message" id="error-message"></div>
         </div>
     </div>
 
