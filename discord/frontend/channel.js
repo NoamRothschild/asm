@@ -152,16 +152,27 @@ class ChannelWebSocket {
             const messageData = new Uint8Array(data);
             // first 4 bytes are UNIX timestamp and were sent in little endian format
             const timestamp = new Date(messageData.subarray(0, 4).reverse().join(''));
-            // next bytes until a null byte are username
-            let username = '';
+            
+            // Find the null byte that separates username from message content
+            let nullByteIndex = -1;
             for (let i = 4; i < messageData.length; i++) {
                 if (messageData[i] === 0) {
+                    nullByteIndex = i;
                     break;
                 }
-                username += String.fromCharCode(messageData[i]);
             }
-            // next is message content
-            const messageContent = String.fromCharCode(...messageData.slice(username.length + 5));
+            
+            if (nullByteIndex === -1) {
+                throw new Error('Server sent a malformed message (no null byte found)');
+            }
+            
+            // Extract username using TextDecoder for proper UTF-8 handling
+            const usernameBytes = messageData.slice(4, nullByteIndex);
+            const username = new TextDecoder('utf-8').decode(usernameBytes);
+            
+            // Extract message content using TextDecoder for proper UTF-8 handling
+            const messageBytes = messageData.slice(nullByteIndex + 1);
+            const messageContent = new TextDecoder('utf-8').decode(messageBytes);
             
             // formatted like HH:MM AM/PM
             const date = new Date(timestamp);
