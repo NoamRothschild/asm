@@ -134,8 +134,10 @@ generateRequestStruct:
 .validPathEnding:
   mov byte [edi], 0 ; null terminate string
   
-  mov edx, dword [DATA_START]
+  cmp word [eax + REQ_RESP_CODE_OFFSET], 101
+  jz .end
 
+  mov edx, dword [DATA_START]
   .goto_DataStart:
   inc ebx
   cmp dword [ebx], edx
@@ -155,8 +157,6 @@ generateRequestStruct:
   cmovle ecx, esi
 
   pop esi
-
-  mov [eax + REQ_CONTENT_LENGTH_OFFSET], ecx
 
   lea edi, [eax + REQ_DATA_OFFSET]
 .copyData:
@@ -246,6 +246,26 @@ getMethodType:
 .end:
   pop ebx
   pop eax
+  pop ebp
+  ret
+
+getReqDataPtr:
+  push ebp
+  mov ebp, esp
+  push ebx
+  push edx
+
+  mov ebx, [ebp + 8] ; buffer
+  mov edx, dword [DATA_START] ; \r\n\r\n
+.findData:
+  inc ebx
+  cmp [ebx], edx
+  jnz .findData
+  add ebx, 4 ; skip \r\n\r\n
+  mov [ebp + 8], ebx
+  
+  pop edx
+  pop ebx
   pop ebp
   ret
 

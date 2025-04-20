@@ -330,6 +330,11 @@
                 "params": ["[&] base path pointer", "[&] HTTP request buffer pointer", "[&] struct pointer (length must be above REQ_TOTAL_SIZE)"],
                 "return": []
             },
+            "gerReqDataPtr": {
+                "description": "returns the start of data pointer in an http request",
+                "params": ["[&] HTTP request buffer pointer"],
+                "return": ["[&] start of data pointer"]
+            },
             "printStruct": {
                 "description": "prints a formatted debugging message based from the given struct",
                 "params": ["[&] struct pointer (length must be above REQ_TOTAL_SIZE)"],
