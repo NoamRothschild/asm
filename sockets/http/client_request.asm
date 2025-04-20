@@ -7,10 +7,10 @@ section .data
   REQ_METHOD_SIZE equ 1 ; 1 byte in length 
   REQ_PATH_OFFSET equ REQ_METHOD_OFFSET + REQ_METHOD_SIZE
   REQ_PATH_SIZE equ 256 ; 255 bytes in length + null terminator
-  ;//REQ_CONTENT_LENGTH_OFFSET equ REQ_PATH_OFFSET + REQ_PATH_SIZE
-  ;//REQ_CONTENT_LENGTH_SIZE equ 2 ; 2 bytes in length (potentially can store 65,535 in length)
-  ;//REQ_DATA_OFFSET equ REQ_CONTENT_LENGTH_OFFSET + REQ_CONTENT_LENGTH_SIZE
-  REQ_DATA_OFFSET equ REQ_PATH_OFFSET + REQ_PATH_SIZE
+  REQ_CONTENT_LENGTH_OFFSET equ REQ_PATH_OFFSET + REQ_PATH_SIZE
+  REQ_CONTENT_LENGTH_SIZE equ 4 ; 4 bytes in length (potentially can store 4GB in length)
+  REQ_DATA_OFFSET equ REQ_CONTENT_LENGTH_OFFSET + REQ_CONTENT_LENGTH_SIZE
+  ;//REQ_DATA_OFFSET equ REQ_PATH_OFFSET + REQ_PATH_SIZE
   REQ_DATA_SIZE equ 4096 ; 4096 bytes in length
   REQ_RESP_CODE_OFFSET equ REQ_DATA_OFFSET + REQ_DATA_SIZE
   REQ_RESP_CODE_SIZE equ 2 ; 2 bytes in length
@@ -51,6 +51,10 @@ generateRequestStruct:
   pop eax
 
   mov word [eax + REQ_RESP_CODE_OFFSET], 200 ; set 200 OK as default resp code
+  mov dword [eax + REQ_CONTENT_LENGTH_OFFSET], 0 ; set data length as 0 at the start
+  push dword [ebp+12] ; struct
+  push dword [ebp+8] ; request content
+  call parseHeaders
 
   sub esp, METHOD_MAX_STR_LEN
   mov edi, esp ; reserve tmp buff for req
@@ -138,15 +142,24 @@ generateRequestStruct:
   jnz .goto_DataStart
   add ebx, 4
 
-  mov edx, REQ_TOTAL_SIZE
-  add edx, [ebp+12] ; get end of HTTP req ptr
-  mov ecx, REQ_DATA_SIZE
-  mov edi, eax
-  add edi, REQ_DATA_OFFSET
-  .copyData:
-  cmp edx, ebx
-  jbe .end
+  mov edi, REQ_DATA_SIZE
+  mov edx, [eax + REQ_CONTENT_LENGTH_OFFSET]
+  ; finding min between ecx & edx (or 1 if <= 0) and storing in edi
+  push esi
+  mov esi, 1
 
+  cmp edi, edx
+  mov ecx, edx
+  cmovle ecx, edi
+  test ecx, ecx
+  cmovle ecx, esi
+
+  pop esi
+
+  mov [eax + REQ_CONTENT_LENGTH_OFFSET], ecx
+
+  lea edi, [eax + REQ_DATA_OFFSET]
+.copyData:
   mov dl, byte [ebx]
   mov byte [edi], dl
 
@@ -155,10 +168,6 @@ generateRequestStruct:
   loop .copyData
 
 .end:
-  push dword [ebp+12] ; struct
-  push dword [ebp+8] ; request content
-  call parseHeaders
-
   pop ecx
   pop eax
   pop edi
@@ -242,6 +251,7 @@ getMethodType:
 
 STR_WEBSOCKET_UPGRADE: db "Upgrade: websocket", 0
 STR_WEBSOCKET_KEY: db "Sec-WebSocket-Key: ", 0
+STR_CONTENT_LENGTH: db "Content-Length: ", 0
 parseHeaders:
   push ebp
   mov ebp, esp
@@ -276,7 +286,29 @@ parseHeaders:
   cmp edx, 1
   jz .websocketExists
 
+  push ebx
+  push STR_CONTENT_LENGTH
+  call startswith
+  pop edx
+  cmp edx, 1
+  jz .contentLength
+
   ; ... do all other handling of headers
+
+  jmp .nextHeader
+.contentLength:
+  push STR_CONTENT_LENGTH
+  call igetLength
+  add ebx, [esp]
+  add esp, 4
+
+  push ebx
+  push 0xD
+  call ifromString
+  pop edx
+
+  mov eax, [ebp+8] ; struct pointer
+  mov dword [eax + REQ_CONTENT_LENGTH_OFFSET], edx
 
   jmp .nextHeader
 .secWebsocketKey:
@@ -479,14 +511,13 @@ printReqFormatted:
   push ' '
   call printChar
 
-  mov ebx, eax
-  add ebx, REQ_PATH_OFFSET
+  lea ebx, [eax + REQ_PATH_OFFSET]
   push ebx
   call printMessage
 
-  push ' '
-  push '-'
-  push ' '
+  push " "
+  push "-"
+  push " "
   call printChar
   call printChar
   call printChar
@@ -511,7 +542,20 @@ printReqFormatted:
   call printMessage
   push ebx
   call printMessage
+
+  push '('
+  push ' '
+  call printChar
+  call printChar
+  
+  push dword [eax + REQ_CONTENT_LENGTH_OFFSET]
+  call printInt
+
+  push ')'
+  call printChar
+
   call printTerminator
+  
 .end:
   pop ebx
   pop eax
