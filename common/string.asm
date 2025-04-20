@@ -246,4 +246,52 @@ strstr:
   pop eax
   pop ebp
   ret 4
+
+; start ptr, end char
+ifromString:
+  push ebp
+  mov ebp, esp
+  push eax
+  push ebx
+  push edi
+  push esi
+
+  mov esi, [ebp + 12] ; start ptr
+  mov edx, [ebp + 8 ] ; end char (0 padded)
+  mov dword [ebp + 12], 0 ; output number
+
+.digitLoop:
+  xor eax, eax
+  mov al, byte [esi]
+  cmp al, dl
+  jz .end
+
+  ; *= 10
+  push eax
+  push edx
+
+  mov eax, [ebp + 12]
+  xor edx, edx
+  mov edi, 10
+  mul edi
+
+  mov [ebp + 12], eax
+  pop edx
+  pop eax
+
+  ; += digit
+  sub al, 48 ; '0' (turn into actual number)
+  add dword [ebp + 12], eax
+  
+  inc esi
+  jmp .digitLoop
+
+.end:
+  pop esi
+  pop edi
+  pop ebx
+  pop eax
+  pop ebp
+  ret 4
+
 %endif

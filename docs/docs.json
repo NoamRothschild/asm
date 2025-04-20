@@ -151,6 +151,11 @@
                 "description": "copies the given string to the given location",
                 "params": ["[&] dest str buffer pointer", "[&] src str buffer pointer"],
                 "return": ["[&] end of message ptr"]
+            },
+            "ifromString": {
+                "description": "casts a string into an unsigned int",
+                "params": ["[&] string ptr", "[#] end character (0 padded)"],
+                "return": ["[#] casted int"]
             }
         },
         "fileManager.asm": {
