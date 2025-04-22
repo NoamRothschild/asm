@@ -50,6 +50,11 @@
                 "description": "prints a string until a specified character is encountered",
                 "params": ["[&] buffer pointer", "[#] terminator character"],
                 "return": []
+            },
+            "printf": {
+                "description": "prints a formatted string to stdout",
+                "params": ["[&] format string pointer", "[&] variable arguments"],
+                "return": []
             }
         },
         "general.asm": {
@@ -234,6 +239,11 @@
                 "description": "decodes a base64 encoded string into a byte array and stores it in a buffer",
                 "params": ["[&] output buffer pointer", "[&] b64 string pointer"],
                 "return": []
+            },
+            "b64UnmapEncoding": {
+                "description": "unmaps base64 encoded characters to their original values",
+                "params": ["[#] base64 character"],
+                "return": ["[#] original value"]
             }
         }
     },
@@ -449,6 +459,11 @@
                 "description": "finds a user in the database by their authentication token",
                 "params": ["[&] token pointer", "[&] database pointer"],
                 "return": ["[&] user data pointer or NULL if not found"]
+            },
+            "authenticate_usr": {
+                "description": "authenticates a user with username and password",
+                "params": ["[&] password pointer", "[&] username pointer", "[&] database pointer"],
+                "return": ["[&] user pointer"]
             }
         }
     }
