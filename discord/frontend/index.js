@@ -83,22 +83,16 @@ async function initProfilePictureUpload() {
         }
         
         try {
-            // Read file as ArrayBuffer (raw binary data)
-            const arrayBuffer = await file.arrayBuffer();
-
-            if (arrayBuffer.byteLength > 1024 * 1024 * 0.85) {
-                errorMessage.textContent = 'File size must be less than 85% of 1MB';
-                errorMessage.style.display = 'block';
-                return;
-            }
+            // Process the image before uploading
+            const processedImageBuffer = await processImage(file);
             
-            // Send raw binary data to server
+            // Send processed image data to server
             const response = await fetch('/profiles/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/octet-stream'
                 },
-                body: arrayBuffer
+                body: processedImageBuffer
             });
             
             if (!response.ok) {
@@ -119,6 +113,67 @@ async function initProfilePictureUpload() {
             errorMessage.style.display = 'block';
             console.error('Upload error:', error);
         }
+    }
+    
+    /**
+     * Process image by resizing and compressing it
+     * @param {File} file - The image file to process
+     * @returns {Promise<ArrayBuffer>} - The processed image as an ArrayBuffer
+     */
+    async function processImage(file) {
+        return new Promise((resolve, reject) => {
+            // Create an image element to load the file
+            const img = new Image();
+            
+            img.onload = () => {
+                // Create a canvas to draw the image
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Calculate new dimensions while maintaining aspect ratio
+                let width = img.width;
+                let height = img.height;
+                
+                // Rescale if height is greater than 256px
+                if (height > 256) {
+                    const ratio = 256 / height;
+                    height = 256;
+                    width = Math.round(width * ratio);
+                }
+                
+                // Set canvas dimensions to the new size
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Draw the image on the canvas (this will resize it)
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Convert canvas to blob with compression
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        reject(new Error('Failed to create image blob'));
+                        return;
+                    }
+                    
+                    // Convert blob to ArrayBuffer
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        resolve(reader.result);
+                    };
+                    reader.onerror = () => {
+                        reject(new Error('Failed to read image data'));
+                    };
+                    reader.readAsArrayBuffer(blob);
+                }, 'image/png', 0.8); // 0.8 quality for compression
+            };
+            
+            img.onerror = () => {
+                reject(new Error('Failed to load image'));
+            };
+            
+            // Load the image from the file
+            img.src = URL.createObjectURL(file);
+        });
     }
 }
 
