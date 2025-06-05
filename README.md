@@ -2,7 +2,7 @@
 
 all of my assembler scripts
 
-Scripts are built for x86-64 architecture and can be ran natively on any linux distro.
+Scripts are written in x86 assembly for linux using NASM. Scripts will compile and work on every x86 / x86_64 linux machine.
 
 | Status | Working |
 |----------|-------|
