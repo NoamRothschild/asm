@@ -212,9 +212,10 @@ window.addMessage = function(username, text, date) {
     // Convert URLs to clickable links
     const urlRegex = /([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#\.]?[\w-]+)*\/?/gm;
     const processedText = text.replace(urlRegex, (url) => {
-        // Ensure URL has protocol
-        const fullUrl = url.startsWith('http') || url.startsWith('https') ? url : `http://${url}`;
-        return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+        return url;
+        // url pattern-matching done by markdown parser
+        // const fullUrl = url.startsWith('http') || url.startsWith('https') ? url : `http://${url}`;
+        // return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${url}</a>`;
     }).replace(/@([A-Za-z0-9_]+)/g, (mention) => {
         return `<span style="background-color: #31304F; color: #A5B5F9; border-radius: 5px; text-decoration: underline;">${mention}</span>`;
     }).replace(':sob:', '😭');
@@ -230,7 +231,7 @@ window.addMessage = function(username, text, date) {
                 <span class="message-username">${username}</span>
                 <span class="message-date">${date}</span>
             </div>
-            <div class="message-text">${processedText}</div>
+            <div class="message-text">${marked.parse(processedText)}</div>
         </div>
     `;
 

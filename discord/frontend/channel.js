@@ -16,7 +16,8 @@ function getCurrentChannel() {
  * @returns {string} The URI of the currently selected channel
  */
 function channelNameToURI(channelName) {
-    return channelName.replace(' ', '-').toLowerCase();
+    if (channelName == null) return null;
+    return channelName.replace(/\s/gm, '-').toLowerCase();
 }
 
 /**
@@ -46,7 +47,7 @@ class ChannelWebSocket {
 
         this.serverUrl = `${protocol}://${domain}${port}`;
         this.socket = null;
-        this.currentChannel = initialChannel || getCurrentChannel();
+        this.currentChannel = channelNameToURI(initialChannel) || getCurrentChannel();
         this.connectionStatus = 'disconnected';
     }
 
@@ -58,6 +59,29 @@ class ChannelWebSocket {
         return this.serverUrl + '/channels/' + channelNameToURI(this.currentChannel);
     }
 
+    aboutThisProject() {
+        if (channelNameToURI(this.currentChannel) == 'about-this-project') {
+            window.addMessage('NoamRTD', `## Introduction
+Assembly. You all hate it. "unreadable machine code", "a debugging nightmare", "incompatitable across different devices" - some might say, but I think it is beautiful.
+
+Something about uncovering those layers of abstraction, and understanding how things really work always make's me hooked.
+
+Try once to look at something you take for granted, and tell yourself: "but how does it work?", and then do the same for your result on and on. Slowly but surely, layer by layer, you will begin to understand how things *really* work behind the sences.
+
+In the old days, people were making compilers for languages like Fortran, or C to escape the hell of dealing with raw CPU instructions and memory (Another article from me will most likely come about this topic too). People wanted layers of abstraction that would help them program faster and with a better experience overall (I'm ignoring for now the cross-platform aspect since this is not what this article is about).
+
+I did not live to experience those old days. Instead I was born into a world where you can drag a 3d cube into a grid, click a magic green button and have a game (has its pros and cons). While this process mainly made making games feel exciting as a child, it also lit a spark inside me - the fact that I can operate this black box to do those kinds of things, and the fact that once I'm done I can really feel ownership of a thing I made got me pumped into programming - venturing into the unknown.
+
+Last year, I moved into a new school. I've been searching for a better place to learn Computer Science than my old school - And I found just the place. After our professor taught us the basics of 16 bit assembly, and guided us through our way to coding a simple snake game he threw us straight into work. "You have until the end of the year to make a project in assembly, and present it to the class".
+
+## The project
+
+I immediately knew I wanted to make something special - I wanted to stand out, and it had to be done with networking.
+So I started researching. Our environment ([dosbox](https://www.dosbox.com/)) had poor networking capabilities. it only supported an old protocol named IPX. while I did have success emulating the TCP/IP model over IPX - using tools I found on the internet, it was not worth the trouble. I opted to learn another architecture of assembly, one that would allow me better access to networking.
+My initial plans were to create a simple old forums website, allowing users to look and respond to simple posts.`, '27/4/2024');
+        }
+
+    }
     /**
      * Connect to the WebSocket server
      * @param {string} channelName - The name of the channel to join
@@ -72,6 +96,7 @@ class ChannelWebSocket {
                 this.socket.onopen = () => {
                     console.log(`WebSocket connection established to ${this.currentChannel}`);
                     this.connectionStatus = 'connected';
+                    this.aboutThisProject();
                     resolve();
                 };
                 

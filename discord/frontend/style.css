@@ -236,6 +236,7 @@ body {
 .message-text {
     color: #dcddde;
     line-height: 1.4;
+    font-size: 1.2em;
 }
 
 img.emoji {
@@ -385,4 +386,12 @@ img.emoji {
     color: #ed4245;
     margin-top: 10px;
     display: none;
+}
+
+h2 {
+  margin-top: 0;
+}
+p {
+  margin-top: 0;
+  margin-bottom: 0.7em;
 }
