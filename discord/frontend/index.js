@@ -213,10 +213,16 @@ window.addMessage = function(username, text, date) {
     const urlRegex = /([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#\.]?[\w-]+)*\/?/gm;
     const processedText = text.replace(urlRegex, (url) => {
         // Ensure URL has protocol
-        const fullUrl = url.startsWith('http') ? url : `http://${url}`;
+        const fullUrl = url.startsWith('http') || url.startsWith('https') ? url : `http://${url}`;
         return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-    });
-    
+    }).replace(/@([A-Za-z0-9_]+)/g, (mention) => {
+        return `<span style="background-color: #31304F; color: #A5B5F9; border-radius: 5px; text-decoration: underline;">${mention}</span>`;
+    }).replace(':sob:', '😭');
+
+    // Check if the processed text contains only emojis
+    const emojiOnlyRegex = /^(\p{Extended_Pictographic}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?)+$/u;
+    const isEmojiOnly = emojiOnlyRegex.test(processedText);
+
     messageElement.innerHTML = `
         <img src="${profilePicture}" onerror="this.onerror=null; this.src='logo.svg'" alt="profile" class="message-profile-picture">
         <div class="message-content">
@@ -227,8 +233,14 @@ window.addMessage = function(username, text, date) {
             <div class="message-text">${processedText}</div>
         </div>
     `;
+
+    // If the message contains only emojis, add a class for only emoji
+    if (isEmojiOnly) {
+        messageElement.querySelector('.message-text').classList.add('emoji-only');
+    }
     
     messagesContainer.appendChild(messageElement);
+    twemoji.parse(messageElement.querySelector('.message-text'));
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 

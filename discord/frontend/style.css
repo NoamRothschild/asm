@@ -52,7 +52,7 @@ body {
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 5px;
-    font-size: 2.5vh;
+    font-size: 2vh;
     margin-bottom: 10px;
     margin-top: 10px;
     cursor: pointer;
@@ -236,6 +236,15 @@ body {
 .message-text {
     color: #dcddde;
     line-height: 1.4;
+}
+
+img.emoji {
+  height: 1.1em;
+  vertical-align: -0.1em;
+}
+
+.emoji-only > img.emoji {
+  height: 2.5em;
 }
 
 .message-text a {
