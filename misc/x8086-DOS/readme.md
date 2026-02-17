@@ -1,6 +1,6 @@
-# x86-Dos
+# 8086-Dos
 
-The files here are written for an x86 enviorment like windows 3.1 and can be ran on modern hardware using [DosBox](https://www.dosbox.com/).
+The files here are written for an 8086 enviorment like windows 3.1 and can be ran on modern hardware using [DosBox](https://www.dosbox.com/).
 
 Files are written in TASM and can be compiled using the next commands:
 
