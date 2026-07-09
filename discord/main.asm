@@ -162,6 +162,9 @@ _start:
   pop eax
   cmp eax, 0 ; when resulting in 0, executor is child process, else parent.
   jz .child
+
+  push esi
+  call closeSocket
   jmp .parent
 
 .child:
